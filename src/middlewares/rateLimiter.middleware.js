@@ -1,6 +1,6 @@
-import rateLimit from 'express-rate-limit';
-import config from '../config/index.js';
-import { MESSAGES } from '../constants/index.js';
+import rateLimit from "express-rate-limit";
+import config from "../config/index.js";
+import { MESSAGES } from "../constants/index.js";
 
 const createLimiter = ({ windowMs, max }) =>
   rateLimit({

@@ -5,13 +5,17 @@ Base URL: `http://localhost:5000/api`
 All responses use a consistent envelope:
 
 ```json
-{ "success": true, "message": "Login successful", "data": { } }
+{ "success": true, "message": "Login successful", "data": {} }
 ```
 
 Errors:
 
 ```json
-{ "success": false, "message": "Validation failed", "errors": [{ "field": "email", "message": "\"email\" must be a valid email" }] }
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": [{ "field": "email", "message": "\"email\" must be a valid email" }]
+}
 ```
 
 ## Authentication
@@ -44,7 +48,11 @@ Revokes the current refresh token and clears the cookie. Send `Authorization: Be
 ### POST /auth/change-password — Authenticated
 
 ```json
-{ "currentPassword": "OldPass123", "newPassword": "NewPass123", "confirmPassword": "NewPass123" }
+{
+  "currentPassword": "OldPass123",
+  "newPassword": "NewPass123",
+  "confirmPassword": "NewPass123"
+}
 ```
 
 Revokes all refresh tokens for the user.
@@ -57,37 +65,37 @@ Returns the current user.
 
 All routes require `Authorization: Bearer <accessToken>` and role `admin` or `hr`.
 
-| Method | Endpoint | Body / Query |
-| ------ | -------- | ------------ |
-| GET    | /users | `page`, `limit`, `search`, `role`, `isActive` (query) |
-| POST   | /users | `{ name, email, password, role?, isActive? }` |
-| GET    | /users/:id | — |
+| Method | Endpoint   | Body / Query                                              |
+| ------ | ---------- | --------------------------------------------------------- |
+| GET    | /users     | `page`, `limit`, `search`, `role`, `isActive` (query)     |
+| POST   | /users     | `{ name, email, password, role?, isActive? }`             |
+| GET    | /users/:id | —                                                         |
 | PATCH  | /users/:id | any subset of `{ name, email, password, role, isActive }` |
-| DELETE | /users/:id | — |
+| DELETE | /users/:id | —                                                         |
 
 ## Departments
 
 All routes require authentication. Writes additionally require `admin` or `hr`.
 
-| Method | Endpoint | Body / Query |
-| ------ | -------- | ------------ |
-| GET    | /departments | `page`, `limit`, `search`, `isActive` (query) |
-| POST   | /departments | `{ name, code, description?, head?, isActive? }` |
-| GET    | /departments/:id | — |
-| PATCH  | /departments/:id | any subset of the create body |
-| DELETE | /departments/:id | blocked while employees belong to it |
+| Method | Endpoint         | Body / Query                                     |
+| ------ | ---------------- | ------------------------------------------------ |
+| GET    | /departments     | `page`, `limit`, `search`, `isActive` (query)    |
+| POST   | /departments     | `{ name, code, description?, head?, isActive? }` |
+| GET    | /departments/:id | —                                                |
+| PATCH  | /departments/:id | any subset of the create body                    |
+| DELETE | /departments/:id | blocked while employees belong to it             |
 
 ## Employees (Admin, HR)
 
 All routes require role `admin` or `hr`.
 
-| Method | Endpoint | Body / Query |
-| ------ | -------- | ------------ |
-| GET    | /employees | `page`, `limit`, `status`, `department`, `search` (query) |
-| POST   | /employees | `{ user, department, employeeId, designation, joiningDate, phone?, address?, salary?, status? }` |
-| GET    | /employees/:id | — |
-| PATCH  | /employees/:id | any subset of the create body |
-| DELETE | /employees/:id | — |
+| Method | Endpoint       | Body / Query                                                                                     |
+| ------ | -------------- | ------------------------------------------------------------------------------------------------ |
+| GET    | /employees     | `page`, `limit`, `status`, `department`, `search` (query)                                        |
+| POST   | /employees     | `{ user, department, employeeId, designation, joiningDate, phone?, address?, salary?, status? }` |
+| GET    | /employees/:id | —                                                                                                |
+| PATCH  | /employees/:id | any subset of the create body                                                                    |
+| DELETE | /employees/:id | —                                                                                                |
 
 `user` must be an existing user id; `department` an existing department id.
 `employeeId` must be unique.
@@ -100,7 +108,13 @@ All routes require role `admin` or `hr`.
 {
   "success": true,
   "message": "API is healthy",
-  "data": { "status": "ok", "environment": "development", "uptime": 12.3, "timestamp": "...", "database": "connected" }
+  "data": {
+    "status": "ok",
+    "environment": "development",
+    "uptime": 12.3,
+    "timestamp": "...",
+    "database": "connected"
+  }
 }
 ```
 

@@ -72,30 +72,30 @@ npm test                    # node:test + supertest (no MongoDB required)
 
 ## API Overview
 
-| Method | Endpoint                          | Access          | Description                  |
-| ------ | --------------------------------- | --------------- | ---------------------------- |
-| POST   | `/api/auth/register`              | Public          | Self-register as employee    |
-| POST   | `/api/auth/login`                 | Public          | Login, returns JWT pair      |
-| POST   | `/api/auth/refresh`               | Public (cookie) | Rotate refresh token         |
-| POST   | `/api/auth/logout`                | Authenticated   | Revoke refresh token         |
-| GET    | `/api/auth/me`                    | Authenticated   | Current user profile         |
-| POST   | `/api/auth/change-password`       | Authenticated   | Change own password          |
-| GET    | `/api/users`                      | Admin, HR       | List users (paginated)       |
-| POST   | `/api/users`                      | Admin, HR       | Create a user                |
-| GET    | `/api/users/:id`                  | Admin, HR       | Get a user                   |
-| PATCH  | `/api/users/:id`                  | Admin, HR       | Update a user                |
-| DELETE | `/api/users/:id`                  | Admin, HR       | Delete a user                |
-| GET    | `/api/employees`                  | Admin, HR       | List employees (paginated)   |
-| POST   | `/api/employees`                  | Admin, HR       | Create an employee profile   |
-| GET    | `/api/employees/:id`              | Admin, HR       | Get an employee              |
-| PATCH  | `/api/employees/:id`              | Admin, HR       | Update an employee           |
-| DELETE | `/api/employees/:id`              | Admin, HR       | Delete an employee           |
-| GET    | `/api/departments`                | Authenticated   | List departments             |
-| POST   | `/api/departments`                | Admin, HR       | Create a department          |
-| GET    | `/api/departments/:id`            | Authenticated   | Get a department             |
-| PATCH  | `/api/departments/:id`            | Admin, HR       | Update a department          |
-| DELETE | `/api/departments/:id`            | Admin, HR       | Delete a department          |
-| GET    | `/api/health`                     | Public          | Health check                 |
+| Method | Endpoint                    | Access          | Description                |
+| ------ | --------------------------- | --------------- | -------------------------- |
+| POST   | `/api/auth/register`        | Public          | Self-register as employee  |
+| POST   | `/api/auth/login`           | Public          | Login, returns JWT pair    |
+| POST   | `/api/auth/refresh`         | Public (cookie) | Rotate refresh token       |
+| POST   | `/api/auth/logout`          | Authenticated   | Revoke refresh token       |
+| GET    | `/api/auth/me`              | Authenticated   | Current user profile       |
+| POST   | `/api/auth/change-password` | Authenticated   | Change own password        |
+| GET    | `/api/users`                | Admin, HR       | List users (paginated)     |
+| POST   | `/api/users`                | Admin, HR       | Create a user              |
+| GET    | `/api/users/:id`            | Admin, HR       | Get a user                 |
+| PATCH  | `/api/users/:id`            | Admin, HR       | Update a user              |
+| DELETE | `/api/users/:id`            | Admin, HR       | Delete a user              |
+| GET    | `/api/employees`            | Admin, HR       | List employees (paginated) |
+| POST   | `/api/employees`            | Admin, HR       | Create an employee profile |
+| GET    | `/api/employees/:id`        | Admin, HR       | Get an employee            |
+| PATCH  | `/api/employees/:id`        | Admin, HR       | Update an employee         |
+| DELETE | `/api/employees/:id`        | Admin, HR       | Delete an employee         |
+| GET    | `/api/departments`          | Authenticated   | List departments           |
+| POST   | `/api/departments`          | Admin, HR       | Create a department        |
+| GET    | `/api/departments/:id`      | Authenticated   | Get a department           |
+| PATCH  | `/api/departments/:id`      | Admin, HR       | Update a department        |
+| DELETE | `/api/departments/:id`      | Admin, HR       | Delete a department        |
+| GET    | `/api/health`               | Public          | Health check               |
 
 See [`docs/api.md`](docs/api.md) for request/response details.
 

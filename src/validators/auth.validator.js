@@ -1,4 +1,4 @@
-import Joi from 'joi';
+import Joi from "joi";
 
 export const registerSchema = Joi.object({
   name: Joi.string().trim().min(2).max(100).required(),
@@ -12,11 +12,15 @@ export const loginSchema = Joi.object({
 });
 
 export const refreshTokenSchema = Joi.object({
-  refreshToken: Joi.string().optional().allow(''),
+  refreshToken: Joi.string().optional().allow(""),
 });
 
 export const changePasswordSchema = Joi.object({
   currentPassword: Joi.string().required(),
-  newPassword: Joi.string().min(8).max(72).required().invalid(Joi.ref('currentPassword')),
-  confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required(),
-}).with('newPassword', 'confirmPassword');
+  newPassword: Joi.string()
+    .min(8)
+    .max(72)
+    .required()
+    .invalid(Joi.ref("currentPassword")),
+  confirmPassword: Joi.string().valid(Joi.ref("newPassword")).required(),
+}).with("newPassword", "confirmPassword");

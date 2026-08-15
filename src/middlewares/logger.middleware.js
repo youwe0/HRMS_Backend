@@ -1,10 +1,10 @@
-import logger from '../utils/logger.js';
+import logger from "../utils/logger.js";
 
 /** Logs every request with method, path, status and duration. */
 export const httpLogger = (req, res, next) => {
   const start = Date.now();
 
-  res.on('finish', () => {
+  res.on("finish", () => {
     const duration = Date.now() - start;
     const message = `${req.method} ${req.originalUrl} ${res.statusCode} ${duration}ms`;
 

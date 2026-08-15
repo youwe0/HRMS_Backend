@@ -1,14 +1,20 @@
-import { User } from '../models/index.js';
+import { User } from "../models/index.js";
 import {
   ApiError,
   hashPassword,
   getPagination,
   getPaginationMeta,
-} from '../utils/index.js';
-import { HTTP_STATUS, MESSAGES } from '../constants/index.js';
-import { formatUserResponse } from '../helpers/index.js';
+} from "../utils/index.js";
+import { HTTP_STATUS, MESSAGES } from "../constants/index.js";
+import { formatUserResponse } from "../helpers/index.js";
 
-export const createUser = async ({ name, email, password, role, isActive = true }) => {
+export const createUser = async ({
+  name,
+  email,
+  password,
+  role,
+  isActive = true,
+}) => {
   const normalizedEmail = email.toLowerCase().trim();
 
   const existing = await User.findOne({ email: normalizedEmail });
@@ -28,19 +34,33 @@ export const createUser = async ({ name, email, password, role, isActive = true 
   return formatUserResponse(user.toObject());
 };
 
-export const getUsers = async ({ page = 1, limit = 10, search, role, isActive } = {}) => {
+export const getUsers = async ({
+  page = 1,
+  limit = 10,
+  search,
+  role,
+  isActive,
+} = {}) => {
   const filter = {};
 
   if (search) {
-    const regex = new RegExp(search, 'i');
+    const regex = new RegExp(search, "i");
     filter.$or = [{ name: regex }, { email: regex }];
   }
   if (role) filter.role = role;
-  if (typeof isActive === 'boolean') filter.isActive = isActive;
+  if (typeof isActive === "boolean") filter.isActive = isActive;
 
-  const { page: safePage, limit: safeLimit, skip } = getPagination({ page, limit });
+  const {
+    page: safePage,
+    limit: safeLimit,
+    skip,
+  } = getPagination({ page, limit });
   const [users, total] = await Promise.all([
-    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(safeLimit).lean(),
+    User.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .lean(),
     User.countDocuments(filter),
   ]);
 
@@ -68,7 +88,10 @@ export const updateUser = async (id, payload) => {
 
   if (rest.email) {
     const normalizedEmail = rest.email.toLowerCase().trim();
-    const duplicate = await User.findOne({ email: normalizedEmail, _id: { $ne: id } });
+    const duplicate = await User.findOne({
+      email: normalizedEmail,
+      _id: { $ne: id },
+    });
     if (duplicate) {
       throw new ApiError(HTTP_STATUS.CONFLICT, MESSAGES.EMAIL_ALREADY_EXISTS);
     }

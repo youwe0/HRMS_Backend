@@ -1,7 +1,7 @@
-import { getExpressApp } from './express.loader.js';
-import { initDatabase } from './mongoose.loader.js';
-import { startJobs } from '../jobs/index.js';
-import logger from '../utils/logger.js';
+import { getExpressApp } from "./express.loader.js";
+import { initDatabase } from "./mongoose.loader.js";
+import { startJobs } from "../jobs/index.js";
+import logger from "../utils/logger.js";
 
 /**
  * Bootstraps everything the server needs (DB connection, scheduled jobs)
@@ -13,6 +13,6 @@ export const initLoaders = async () => {
   await initDatabase();
   startJobs();
 
-  logger.info('All loaders initialized');
+  logger.info("All loaders initialized");
   return app;
 };

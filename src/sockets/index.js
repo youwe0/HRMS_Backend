@@ -1,7 +1,7 @@
-import { Server } from 'socket.io';
-import config from '../config/index.js';
-import { verifyAccessToken } from '../utils/index.js';
-import logger from '../utils/logger.js';
+import { Server } from "socket.io";
+import config from "../config/index.js";
+import { verifyAccessToken } from "../utils/index.js";
+import logger from "../utils/logger.js";
 
 /**
  * Attaches Socket.IO to the HTTP server.
@@ -16,28 +16,28 @@ export const attachSockets = (server) => {
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) {
-      return next(new Error('Authentication required'));
+      return next(new Error("Authentication required"));
     }
     try {
       const payload = verifyAccessToken(token);
       socket.userId = payload.sub;
       return next();
     } catch {
-      return next(new Error('Invalid or expired token'));
+      return next(new Error("Invalid or expired token"));
     }
   });
 
-  io.on('connection', (socket) => {
+  io.on("connection", (socket) => {
     logger.info(`Socket connected: ${socket.id} (user ${socket.userId})`);
     socket.join(`user:${socket.userId}`);
 
-    socket.emit('connected', { message: 'Connected to HRMS realtime service' });
+    socket.emit("connected", { message: "Connected to HRMS realtime service" });
 
-    socket.on('ping', (callback) => {
-      if (typeof callback === 'function') callback({ pong: Date.now() });
+    socket.on("ping", (callback) => {
+      if (typeof callback === "function") callback({ pong: Date.now() });
     });
 
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
       logger.info(`Socket disconnected: ${socket.id}`);
     });
   });

@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
-import crypto from 'node:crypto';
-import config from '../config/index.js';
+import jwt from "jsonwebtoken";
+import crypto from "node:crypto";
+import config from "../config/index.js";
 
 /** Sign a short-lived access token. */
 export const signAccessToken = (payload) =>
@@ -27,4 +27,4 @@ export const verifyRefreshToken = (token) =>
  * dump does not expose usable tokens.
  */
 export const hashRefreshToken = (token) =>
-  crypto.createHash('sha256').update(token).digest('hex');
+  crypto.createHash("sha256").update(token).digest("hex");

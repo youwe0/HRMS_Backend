@@ -1,4 +1,4 @@
-import app from '../app.js';
+import app from "../app.js";
 
 /**
  * Express app creation + middleware mounting live in `src/app.js`.

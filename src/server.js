@@ -1,9 +1,9 @@
-import http from 'node:http';
-import config from './config/index.js';
-import logger from './utils/logger.js';
-import { initLoaders } from './loaders/index.js';
-import { attachSockets } from './sockets/index.js';
-import { disconnectDB } from './db/connection.js';
+import http from "node:http";
+import config from "./config/index.js";
+import logger from "./utils/logger.js";
+import { initLoaders } from "./loaders/index.js";
+import { attachSockets } from "./sockets/index.js";
+import { disconnectDB } from "./db/connection.js";
 
 const startServer = async () => {
   const app = await initLoaders();
@@ -15,7 +15,9 @@ const startServer = async () => {
   }
 
   server.listen(config.port, () => {
-    logger.info(`${config.appName} is running on port ${config.port} (${config.nodeEnv})`);
+    logger.info(
+      `${config.appName} is running on port ${config.port} (${config.nodeEnv})`,
+    );
   });
 
   const shutdown = (signal) => {
@@ -28,11 +30,14 @@ const startServer = async () => {
     setTimeout(() => process.exit(1), 10000).unref();
   };
 
-  process.on('SIGINT', () => shutdown('SIGINT'));
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
 };
 
 startServer().catch((err) => {
-  logger.error('Failed to start server', { error: err.message, stack: err.stack });
+  logger.error("Failed to start server", {
+    error: err.message,
+    stack: err.stack,
+  });
   process.exit(1);
 });
