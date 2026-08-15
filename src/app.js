@@ -1,0 +1,46 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+
+import config from './config/index.js';
+import routes from './routes/index.js';
+import {
+  globalRateLimiter,
+  httpLogger,
+  notFoundHandler,
+  errorHandler,
+} from './middlewares/index.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const publicDir = path.resolve(__dirname, '../public');
+
+const app = express();
+
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+
+// ---- Security & parsing ----
+app.use(helmet());
+app.use(cors(config.cors));
+app.use(compression());
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(cookieParser());
+app.use(express.static(publicDir));
+
+// ---- Logging & rate limiting ----
+app.use(httpLogger);
+app.use(globalRateLimiter);
+
+// ---- Routes ----
+app.use(config.apiPrefix, routes);
+
+// ---- Centralized error handling (must be last) ----
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+export default app;
