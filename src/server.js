@@ -2,17 +2,12 @@ import http from "node:http";
 import config from "./config/index.js";
 import logger from "./utils/logger.js";
 import { initLoaders } from "./loaders/index.js";
-import { attachSockets } from "./sockets/index.js";
 import { disconnectDB } from "./db/connection.js";
 
 const startServer = async () => {
   const app = await initLoaders();
 
   const server = http.createServer(app);
-
-  if (config.enableSockets) {
-    attachSockets(server);
-  }
 
   server.listen(config.port, () => {
     logger.info(
