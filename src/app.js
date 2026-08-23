@@ -10,6 +10,7 @@ import routes from "./routes/index.js";
 import {
   globalRateLimiter,
   httpLogger,
+  methodNotAllowedHandler,
   notFoundHandler,
   errorHandler,
 } from "./middlewares/index.js";
@@ -37,7 +38,8 @@ app.use(globalRateLimiter);
 // ---- Routes ----
 app.use(config.apiPrefix, routes);
 
-// ---- Centralized error handling (must be last) ----
+// ---- Method-not-allowed & 404 (must be last) ----
+app.use(methodNotAllowedHandler);
 app.use(notFoundHandler);
 app.use(errorHandler);
 

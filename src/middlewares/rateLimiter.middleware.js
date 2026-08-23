@@ -11,13 +11,13 @@ const createLimiter = ({ windowMs, max }) =>
     message: { success: false, message: MESSAGES.TOO_MANY_REQUESTS },
   });
 
-/** Applied to the whole API. */
+// Applied to the whole API.
 export const globalRateLimiter = createLimiter({
   windowMs: config.rateLimit.windowMs,
   max: config.rateLimit.max,
 });
 
-/** Stricter limiter for authentication endpoints. */
+// Stricter limiter for authentication endpoints.
 export const authRateLimiter = createLimiter({
   windowMs: config.authRateLimit.windowMs,
   max: config.authRateLimit.max,

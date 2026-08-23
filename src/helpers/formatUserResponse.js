@@ -6,8 +6,5 @@ export const formatUserResponse = (user) => {
   return {
     id: user.userId || user.UserId,
     userName: user.userName || user.UserName,
-    createdAt: user.createdAt || user.Created_at,
-    createdBy: user.createdBy || user.Created_by,
-    isActive: user.isActive ?? user.Is_active,
   };
 };

@@ -1,16 +1,14 @@
 import { ApiError } from "../utils/index.js";
 import { HTTP_STATUS, MESSAGES } from "../constants/index.js";
 
-/**
- * Validates a request part (body | query | params) against a Joi schema.
- * Used inside route middleware — never inside controllers.
- */
+//  Validates a request part (body | query | params) against a Joi schema.
+//  Used inside route middleware — never inside controllers.
 export const validate =
   (schema, source = "body") =>
   (req, res, next) => {
     const { error, value } = schema.validate(req[source], {
       abortEarly: false,
-      stripUnknown: true,
+      allowUnknown: false,
       convert: true,
     });
 

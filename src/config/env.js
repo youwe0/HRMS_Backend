@@ -42,6 +42,11 @@ export default {
     max: parseInt(process.env.AUTH_RATE_LIMIT_MAX, 10) || 20,
   },
 
+  jwt: {
+    secret: process.env.JWT_SECRET || "change-me-in-production",
+    expiresIn: process.env.JWT_EXPIRES_IN || "1h",
+  },
+
   log: {
     level: process.env.LOG_LEVEL || (isProduction ? "info" : "debug"),
     dir: process.env.LOG_DIR || "logs",
