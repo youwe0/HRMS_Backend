@@ -7,7 +7,7 @@ export const notFoundHandler = (req, res, next) => {
   next(
     new ApiError(
       HTTP_STATUS.NOT_FOUND,
-      `${MESSAGES.ROUTE_NOT_FOUND}: ${req.method} ${req.originalUrl}`,
+      `${MESSAGES.NOT_FOUND}: ${req.method} ${req.originalUrl}`,
     ),
   );
 };
@@ -18,7 +18,7 @@ export const errorHandler = (err, req, res, next) => {
 
   if (!(error instanceof ApiError)) {
     if (error.code === 2627 || error.code === 2601) {
-      error = new ApiError(HTTP_STATUS.CONFLICT, "Username already exists");
+      error = new ApiError(HTTP_STATUS.CONFLICT, MESSAGES.USERNAME_EXISTS);
     } else {
       logger.error("Unhandled error", {
         name: err.name,

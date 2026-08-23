@@ -5,4 +5,5 @@ export {
   authRateLimiter,
 } from "./rateLimiter.middleware.js";
 export { httpLogger } from "./logger.middleware.js";
-export { methodNotAllowedHandler } from "./methodNotAllowed.middleware.js";
+export { wrongMethod } from "./methodNotAllowed.middleware.js";
+export { authenticate } from "./auth.middleware.js";

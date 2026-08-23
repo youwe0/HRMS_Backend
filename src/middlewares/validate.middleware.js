@@ -20,7 +20,7 @@ export const validate =
       return next(
         new ApiError(
           HTTP_STATUS.BAD_REQUEST,
-          MESSAGES.VALIDATION_FAILED,
+          MESSAGES.UNEXPECTED_REQUEST,
           details,
         ),
       );

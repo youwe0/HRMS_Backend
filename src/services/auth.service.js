@@ -32,7 +32,7 @@ const findUser = async (userName, includePassword = false) => {
 export const register = async ({ userName, password }) => {
   const normalizedUserName = userName.trim();
   if (await findUser(normalizedUserName)) {
-    throw new ApiError(HTTP_STATUS.CONFLICT, "Username already exists");
+    throw new ApiError(HTTP_STATUS.CONFLICT, MESSAGES.USERNAME_EXISTS);
   }
 
   const result = await getDB()
