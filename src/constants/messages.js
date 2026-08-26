@@ -24,6 +24,7 @@ export const MESSAGES = {
   LOGIN_SUCCESS: "Login successful",
   DEPARTMENT_CREATED: "Department created successfully",
   DEPARTMENTS_RETRIEVED: "Departments retrieved successfully",
+  DEPARTMENT_DELETED: "Department deleted successfully",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",

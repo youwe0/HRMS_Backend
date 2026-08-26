@@ -8,3 +8,7 @@ export const createDepartmentSchema = Joi.object({
 });
 
 export const getDepartmentsSchema = paginationSchema();
+
+export const deleteDepartmentSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
+});

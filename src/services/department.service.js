@@ -52,7 +52,7 @@ export const getAllDepartments = async ({ page, limit }) => {
       .input("offset", offset)
       .input("limit", safeLimit)
       .query(
-        `SELECT Id AS id, Department AS department, HOD AS hod, CreatedAt AS createdAt, CreatedBy AS createdBy, IsActive AS isActive
+        `SELECT Id AS id, Department AS department, IsActive AS isActive
          FROM dbo.Departments
          ORDER BY Id
          OFFSET @offset ROWS
@@ -63,4 +63,26 @@ export const getAllDepartments = async ({ page, limit }) => {
   const total = countResult.recordset[0].total;
 
   return { items: dataResult.recordset, total };
+};
+
+/**
+ * Soft-delete a department by setting IsActive = 0.
+ * @param {number} id – department ID (required)
+ * @returns {Object|null} updated department record or null if not found
+ */
+export const deleteDepartment = async ({ id }) => {
+  const db = getDB();
+  const result = await db
+    .request()
+    .input("id", sql.Int, id)
+    .query(
+      `UPDATE dbo.Departments
+       SET IsActive = 0
+       OUTPUT INSERTED.Id AS id,
+              INSERTED.Department AS department,
+              INSERTED.IsActive AS isActive
+       WHERE Id = @id`,
+    );
+
+  return result.recordset[0] || null;
 };

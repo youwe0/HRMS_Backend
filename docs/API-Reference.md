@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-08-26
+> **Last Updated:** 2026-08-27
 
 ---
 
@@ -14,7 +14,8 @@
 | `POST /api/auth/login` | `{ "userName": "john.doe", "passwordHash": "a9993e36..." }` | `{ "success": true, "message": "Login successful", "data": { "token": "eyJhbGci...", "user": { "id": 1, "userName": "john.doe" } } }` |
 | `GET /api/employees?page=1&limit=10` | — | `{ "success": true, "message": "Employees retrieved successfully", "data": { "employees": [...], "pagination": { "page": 1, "limit": 10, "total": 25, "totalPages": 3 } } }` |
 | `POST /api/departments` | `{ "department": "Engineering", "hod": 3, "isActive": true }` | `{ "success": true, "message": "Department created successfully", "data": { "department": { "id": 1, "department": "Engineering", "hod": 3, "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
-| `GET /api/departments?page=1&limit=10` | — | `{ "success": true, "message": "Departments retrieved successfully", "data": { "departments": [...], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
+| `GET /api/departments?page=1&limit=10` | — | `{ "success": true, "message": "Departments retrieved successfully", "data": { "departments": [{ "id": 1, "department": "Engineering", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
+| `DELETE /api/departments/:id` | — | `{ "success": true, "message": "Department deleted successfully", "data": { "department": { "id": 1, "department": "Engineering", "isActive": 0 } } }` |
 
 ---
 
@@ -29,6 +30,7 @@
    - [GET /employees](#get-employees)
    - [POST /departments](#post-departments)
    - [GET /departments](#get-departments)
+   - [DELETE /departments/:id](#delete-departmentsid)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -415,17 +417,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
       {
         "id": 1,
         "department": "Engineering",
-        "hod": 3,
-        "createdAt": "2026-08-26T10:30:00.000Z",
-        "createdBy": 1,
         "isActive": 1
       },
       {
         "id": 2,
         "department": "Marketing",
-        "hod": null,
-        "createdAt": "2026-08-26T11:00:00.000Z",
-        "createdBy": 1,
         "isActive": 1
       }
     ],
@@ -446,6 +442,65 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 | `400` | Invalid query parameters (e.g. negative page) | `Unexpected request` |
 | `401` | Missing or invalid JWT token | `Unauthorized request` |
 | `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### DELETE /departments/:id
+
+Soft-delete a department by setting its `IsActive` status to `0`.
+
+- **URL:** `/api/departments/:id`
+- **Method:** `DELETE`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Path Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `id` | integer | Yes | Positive integer | ID of the department to delete |
+
+#### Request Headers
+
+| Header | Required | Description |
+|---|---|---|
+| `Authorization` | Yes | `Bearer <token>` |
+
+#### Example Request
+
+```http
+DELETE /api/departments/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Department deleted successfully`
+
+```json
+{
+  "success": true,
+  "message": "Department deleted successfully",
+  "data": {
+    "department": {
+      "id": 1,
+      "department": "Engineering",
+      "isActive": 0
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid ID parameter (e.g. non-numeric) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `404` | Department not found | `Not found` |
+| `405` | Wrong HTTP method (e.g. POST, GET) | `Wrong method` |
 | `429` | Too many requests | `Too many requests, please try again later` |
 
 ---
@@ -488,6 +543,8 @@ All messages are centralized in `src/constants/messages.js`. **Never hardcode er
 | `REGISTER_SUCCESS` | `Registration successful` | Successful registration |
 | `LOGIN_SUCCESS` | `Login successful` | Successful login |
 | `DEPARTMENT_CREATED` | `Department created successfully` | Successful department creation |
+| `DEPARTMENTS_RETRIEVED` | `Departments retrieved successfully` | Successful departments retrieval |
+| `DEPARTMENT_DELETED` | `Department deleted successfully` | Successful department deletion |
 | `INTERNAL_SERVER_ERROR` | `Internal server error` | Unhandled errors (500) |
 
 ---
