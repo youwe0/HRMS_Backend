@@ -2,7 +2,18 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-08-25
+> **Last Updated:** 2026-08-26
+
+---
+
+## Quick Reference
+
+| API Endpoint | Sample Payload | Success Response |
+|---|---|---|
+| `POST /api/auth/register` | `{ "userName": "john.doe", "password": "securePass123" }` | `{ "success": true, "message": "Registration successful", "data": { "user": { "id": 5, "userName": "john.doe" } } }` |
+| `POST /api/auth/login` | `{ "userName": "john.doe", "passwordHash": "a9993e36..." }` | `{ "success": true, "message": "Login successful", "data": { "token": "eyJhbGci...", "user": { "id": 1, "userName": "john.doe" } } }` |
+| `GET /api/employees?page=1&limit=10` | — | `{ "success": true, "message": "Employees retrieved successfully", "data": { "employees": [...], "pagination": { "page": 1, "limit": 10, "total": 25, "totalPages": 3 } } }` |
+| `POST /api/departments` | `{ "department": "Engineering", "hod": 3, "isActive": true }` | `{ "success": true, "message": "Department created successfully", "data": { "department": { "id": 1, "department": "Engineering", "hod": 3, "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
 
 ---
 
@@ -15,6 +26,7 @@
    - [POST /auth/register](#post-authregister)
    - [POST /auth/login](#post-authlogin)
    - [GET /employees](#get-employees)
+   - [POST /departments](#post-departments)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -294,6 +306,70 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ---
 
+### POST /departments
+
+Create a new department.
+
+- **URL:** `/api/departments`
+- **Method:** `POST`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** Yes (auth rate limiter)
+
+#### Request Body
+
+| Field | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `department` | string | Yes | Trimmed, 1–200 chars | Name of the department |
+| `hod` | integer | No | Positive integer, must be a valid userId | UserId of the Head of Department |
+| `isActive` | boolean | No | Default: `true` | Whether the department is active |
+
+#### Example Request
+
+```http
+POST /api/departments HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "department": "Engineering",
+  "hod": 3,
+  "isActive": true
+}
+```
+
+#### Success Response
+
+- **Status:** `201 Created`
+- **Message:** `Department created successfully`
+
+```json
+{
+  "success": true,
+  "message": "Department created successfully",
+  "data": {
+    "department": {
+      "id": 1,
+      "department": "Engineering",
+      "hod": 3,
+      "createdAt": "2026-08-26T10:30:00.000Z",
+      "createdBy": 1,
+      "isActive": 1
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Validation failed (missing department, invalid hod) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. GET, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
 ## Error Codes Reference
 
 | HTTP Status | Constant | When Used |
@@ -331,6 +407,7 @@ All messages are centralized in `src/constants/messages.js`. **Never hardcode er
 | `TOO_MANY_REQUESTS` | `Too many requests, please try again later` | Rate limit exceeded |
 | `REGISTER_SUCCESS` | `Registration successful` | Successful registration |
 | `LOGIN_SUCCESS` | `Login successful` | Successful login |
+| `DEPARTMENT_CREATED` | `Department created successfully` | Successful department creation |
 | `INTERNAL_SERVER_ERROR` | `Internal server error` | Unhandled errors (500) |
 
 ---
@@ -410,6 +487,7 @@ export const API_ENDPOINTS = {
   REGISTER: "/auth/register",
   LOGIN: "/auth/login",
   GET_EMPLOYEES: "/employees",
+  CREATE_DEPARTMENT: "/departments",
 } as const;
 ```
 
