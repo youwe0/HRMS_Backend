@@ -1,11 +1,12 @@
 import { getDB } from "../db/connection.js";
+import { buildSqlPagination } from "../utils/pagination.js";
 
 /**
  * Fetch a paginated list of employees.
- * Returns { employees, total } so the controller can build pagination metadata.
+ * Returns { items, total } so the controller can build pagination metadata.
  */
 export const getAllEmployees = async ({ page, limit }) => {
-  const offset = (page - 1) * limit;
+  const { offset, limit: safeLimit } = buildSqlPagination({ page, limit });
   const db = getDB();
 
   // Run count query and data query in parallel for performance
@@ -14,7 +15,7 @@ export const getAllEmployees = async ({ page, limit }) => {
     db
       .request()
       .input("offset", offset)
-      .input("limit", limit)
+      .input("limit", safeLimit)
       .query(
         `SELECT UserId AS userId, UserName AS userName, Role AS role, Is_active AS isActive
          FROM dbo.Users
@@ -26,5 +27,5 @@ export const getAllEmployees = async ({ page, limit }) => {
 
   const total = countResult.recordset[0].total;
 
-  return { employees: dataResult.recordset, total };
+  return { items: dataResult.recordset, total };
 };

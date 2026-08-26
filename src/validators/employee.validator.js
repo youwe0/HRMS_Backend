@@ -1,8 +1,7 @@
-import Joi from "joi";
+import { paginationSchema } from "../utils/pagination.js";
 
-export const getEmployeesSchema = Joi.object({
-  page: Joi.number().integer().min(1).default(1),
-  limit: Joi.number().integer().min(1).max(50).default(10),
-})
-  .unknown(false)
-  .options({ stripUnknown: true });
+//  Validation schema for GET /employees query parameters.
+//  Reuses the shared paginationSchema — override defaults if needed:
+//  paginationSchema({ limit: 20, maxLimit: 100 })
+
+export const getEmployeesSchema = paginationSchema();
