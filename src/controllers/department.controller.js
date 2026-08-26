@@ -1,6 +1,7 @@
 import { asyncHandler, sendSuccess } from "../utils/index.js";
 import { HTTP_STATUS, MESSAGES } from "../constants/index.js";
 import { departmentService } from "../services/index.js";
+import { createPaginatedHandler } from "../utils/pagination.js";
 
 export const createDepartment = asyncHandler(async (req, res) => {
   const department = await departmentService.createDepartment({
@@ -13,3 +14,8 @@ export const createDepartment = asyncHandler(async (req, res) => {
     department,
   });
 });
+
+export const getAllDepartments = createPaginatedHandler(
+  (opts) => departmentService.getAllDepartments(opts),
+  { dataKey: "departments", message: MESSAGES.DEPARTMENTS_RETRIEVED, statusCode: HTTP_STATUS.OK },
+);

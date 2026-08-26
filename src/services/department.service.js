@@ -1,5 +1,6 @@
 import sql from "mssql";
 import { getDB } from "../db/connection.js";
+import { buildSqlPagination } from "../utils/pagination.js";
 
 /**
  * Create a new department.
@@ -34,4 +35,32 @@ export const createDepartment = async ({ department, hod, isActive = true, userI
   );
 
   return result.recordset[0];
+};
+
+/**
+ * Fetch a paginated list of departments.
+ * Returns { items, total } so the controller can build pagination metadata.
+ */
+export const getAllDepartments = async ({ page, limit }) => {
+  const { offset, limit: safeLimit } = buildSqlPagination({ page, limit });
+  const db = getDB();
+
+  const [countResult, dataResult] = await Promise.all([
+    db.request().query("SELECT COUNT(*) AS total FROM dbo.Departments"),
+    db
+      .request()
+      .input("offset", offset)
+      .input("limit", safeLimit)
+      .query(
+        `SELECT Id AS id, Department AS department, HOD AS hod, CreatedAt AS createdAt, CreatedBy AS createdBy, IsActive AS isActive
+         FROM dbo.Departments
+         ORDER BY Id
+         OFFSET @offset ROWS
+         FETCH NEXT @limit ROWS ONLY`,
+      ),
+  ]);
+
+  const total = countResult.recordset[0].total;
+
+  return { items: dataResult.recordset, total };
 };

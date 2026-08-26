@@ -14,6 +14,7 @@
 | `POST /api/auth/login` | `{ "userName": "john.doe", "passwordHash": "a9993e36..." }` | `{ "success": true, "message": "Login successful", "data": { "token": "eyJhbGci...", "user": { "id": 1, "userName": "john.doe" } } }` |
 | `GET /api/employees?page=1&limit=10` | — | `{ "success": true, "message": "Employees retrieved successfully", "data": { "employees": [...], "pagination": { "page": 1, "limit": 10, "total": 25, "totalPages": 3 } } }` |
 | `POST /api/departments` | `{ "department": "Engineering", "hod": 3, "isActive": true }` | `{ "success": true, "message": "Department created successfully", "data": { "department": { "id": 1, "department": "Engineering", "hod": 3, "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
+| `GET /api/departments?page=1&limit=10` | — | `{ "success": true, "message": "Departments retrieved successfully", "data": { "departments": [...], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 
 ---
 
@@ -27,6 +28,7 @@
    - [POST /auth/login](#post-authlogin)
    - [GET /employees](#get-employees)
    - [POST /departments](#post-departments)
+   - [GET /departments](#get-departments)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -366,6 +368,84 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 | `400` | Validation failed (missing department, invalid hod) | `Unexpected request` |
 | `401` | Missing or invalid JWT token | `Unauthorized request` |
 | `405` | Wrong HTTP method (e.g. GET, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### GET /departments
+
+Retrieve a paginated list of departments.
+
+- **URL:** `/api/departments`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Query Parameters
+
+| Parameter | Type | Required | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `page` | integer | No | `1` | Min: `1` | Page number to retrieve |
+| `limit` | integer | No | `10` | Min: `1`, Max: `50` | Number of records per page |
+
+#### Request Headers
+
+| Header | Required | Description |
+|---|---|---|
+| `Authorization` | Yes | `Bearer <token>` |
+
+#### Example Request
+
+```http
+GET /api/departments?page=1&limit=10 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Departments retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Departments retrieved successfully",
+  "data": {
+    "departments": [
+      {
+        "id": 1,
+        "department": "Engineering",
+        "hod": 3,
+        "createdAt": "2026-08-26T10:30:00.000Z",
+        "createdBy": 1,
+        "isActive": 1
+      },
+      {
+        "id": 2,
+        "department": "Marketing",
+        "hod": null,
+        "createdAt": "2026-08-26T11:00:00.000Z",
+        "createdBy": 1,
+        "isActive": 1
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 5,
+      "totalPages": 1
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid query parameters (e.g. negative page) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
 | `429` | Too many requests | `Too many requests, please try again later` |
 
 ---

@@ -18,6 +18,14 @@ router.post(
   validate(departmentValidators.createDepartmentSchema),
   departmentController.createDepartment,
 );
-router.all("/", wrongMethod(["POST"]));
+
+router.get(
+  "/",
+  authenticate,
+  validate(departmentValidators.getDepartmentsSchema),
+  departmentController.getAllDepartments,
+);
+
+router.all("/", wrongMethod(["POST", "GET"]));
 
 export default router;

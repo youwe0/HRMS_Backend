@@ -23,6 +23,7 @@ export const MESSAGES = {
   REGISTER_SUCCESS: "Registration successful",
   LOGIN_SUCCESS: "Login successful",
   DEPARTMENT_CREATED: "Department created successfully",
+  DEPARTMENTS_RETRIEVED: "Departments retrieved successfully",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",
