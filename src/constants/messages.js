@@ -25,6 +25,9 @@ export const MESSAGES = {
   DEPARTMENT_CREATED: "Department created successfully",
   DEPARTMENTS_RETRIEVED: "Departments retrieved successfully",
   DEPARTMENT_DELETED: "Department deleted successfully",
+  DESIGNATION_CREATED: "Designation created successfully",
+  DESIGNATIONS_RETRIEVED: "Designations retrieved successfully",
+  DESIGNATION_DELETED: "Designation deleted successfully",
   USERS_SEARCH_RETRIEVED: "Users retrieved successfully",
 
   // Server errors

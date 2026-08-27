@@ -17,6 +17,9 @@
 | `GET /api/departments?page=1&limit=10` | — | `{ "success": true, "message": "Departments retrieved successfully", "data": { "departments": [{ "id": 1, "department": "Engineering", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/departments/:id` | — | `{ "success": true, "message": "Department deleted successfully", "data": { "department": { "id": 1, "department": "Engineering", "isActive": 0 } } }` |
 | `GET /api/users/search?q=john` | — | `{ "success": true, "message": "Users retrieved successfully", "data": { "users": [{ "userId": 1, "userName": "john.doe" }] } }` |
+| `POST /api/designations` | `{ "designation": "Senior Engineer", "isActive": true }` | `{ "success": true, "message": "Designation created successfully", "data": { "designation": { "id": 1, "designation": "Senior Engineer", "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
+| `GET /api/designations?page=1&limit=10` | — | `{ "success": true, "message": "Designations retrieved successfully", "data": { "designations": [{ "id": 1, "designation": "Senior Engineer", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
+| `DELETE /api/designations/:id` | — | `{ "success": true, "message": "Designation deleted successfully", "data": { "designation": { "id": 1, "designation": "Senior Engineer", "isActive": 0 } } }` |
 
 ---
 
@@ -32,6 +35,9 @@
    - [POST /departments](#post-departments)
    - [GET /departments](#get-departments)
    - [DELETE /departments/:id](#delete-departmentsid)
+   - [POST /designations](#post-designations)
+   - [GET /designations](#get-designations)
+   - [DELETE /designations/:id](#delete-designationsid)
    - [GET /users/search](#get-userssearch)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
@@ -507,6 +513,186 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ---
 
+### POST /designations
+
+Create a new designation.
+
+- **URL:** `/api/designations`
+- **Method:** `POST`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** Yes (auth rate limiter)
+
+#### Request Body
+
+| Field | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `designation` | string | Yes | Trimmed, 1–200 chars | Name of the designation |
+| `isActive` | boolean | No | Default: `true` | Whether the designation is active |
+
+#### Example Request
+
+```http
+POST /api/designations HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "designation": "Senior Engineer",
+  "isActive": true
+}
+```
+
+#### Success Response
+
+- **Status:** `201 Created`
+- **Message:** `Designation created successfully`
+
+```json
+{
+  "success": true,
+  "message": "Designation created successfully",
+  "data": {
+    "designation": {
+      "id": 1,
+      "designation": "Senior Engineer",
+      "createdAt": "2026-08-27T10:30:00.000Z",
+      "createdBy": 1,
+      "isActive": 1
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Validation failed (missing designation) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. GET, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### GET /designations
+
+Retrieve a paginated list of designations.
+
+- **URL:** `/api/designations`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Query Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `page` | integer | No | `1` | Min: `1` | Page number to retrieve |
+| `limit` | integer | No | `10` | Min: `1`, Max: `50` | Number of records per page |
+
+#### Example Request
+
+```http
+GET /api/designations?page=1&limit=10 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Designations retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Designations retrieved successfully",
+  "data": {
+    "designations": [
+      {
+        "id": 1,
+        "designation": "Senior Engineer",
+        "isActive": 1
+      },
+      {
+        "id": 2,
+        "designation": "Manager",
+        "isActive": 1
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 5,
+      "totalPages": 1
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid query parameters (e.g. negative page) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### DELETE /designations/:id
+
+Soft-delete a designation by setting its `IsActive` status to `0`.
+
+- **URL:** `/api/designations/:id`
+- **Method:** `DELETE`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Path Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `id` | integer | Yes | Positive integer | ID of the designation to delete |
+
+#### Example Request
+
+```http
+DELETE /api/designations/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Designation deleted successfully`
+
+```json
+{
+  "success": true,
+  "message": "Designation deleted successfully",
+  "data": {
+    "designation": {
+      "id": 1,
+      "designation": "Senior Engineer",
+      "isActive": 0
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid ID parameter (e.g. non-numeric) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `404` | Designation not found | `Not found` |
+| `405` | Wrong HTTP method (e.g. POST, GET) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
 ### GET /users/search
 
 Search users by userName for autocomplete. Returns up to 5 matching active users.
@@ -610,6 +796,9 @@ All messages are centralized in `src/constants/messages.js`. **Never hardcode er
 | `DEPARTMENT_CREATED` | `Department created successfully` | Successful department creation |
 | `DEPARTMENTS_RETRIEVED` | `Departments retrieved successfully` | Successful departments retrieval |
 | `DEPARTMENT_DELETED` | `Department deleted successfully` | Successful department deletion |
+| `DESIGNATION_CREATED` | `Designation created successfully` | Successful designation creation |
+| `DESIGNATIONS_RETRIEVED` | `Designations retrieved successfully` | Successful designations retrieval |
+| `DESIGNATION_DELETED` | `Designation deleted successfully` | Successful designation deletion |
 | `INTERNAL_SERVER_ERROR` | `Internal server error` | Unhandled errors (500) |
 
 ---
