@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-08-27
+> **Last Updated:** 2026-08-27 (User Search API added)
 
 ---
 
@@ -16,6 +16,7 @@
 | `POST /api/departments` | `{ "department": "Engineering", "hod": 3, "isActive": true }` | `{ "success": true, "message": "Department created successfully", "data": { "department": { "id": 1, "department": "Engineering", "hod": 3, "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
 | `GET /api/departments?page=1&limit=10` | — | `{ "success": true, "message": "Departments retrieved successfully", "data": { "departments": [{ "id": 1, "department": "Engineering", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/departments/:id` | — | `{ "success": true, "message": "Department deleted successfully", "data": { "department": { "id": 1, "department": "Engineering", "isActive": 0 } } }` |
+| `GET /api/users/search?q=john` | — | `{ "success": true, "message": "Users retrieved successfully", "data": { "users": [{ "userId": 1, "userName": "john.doe" }] } }` |
 
 ---
 
@@ -31,6 +32,7 @@
    - [POST /departments](#post-departments)
    - [GET /departments](#get-departments)
    - [DELETE /departments/:id](#delete-departmentsid)
+   - [GET /users/search](#get-userssearch)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -501,6 +503,69 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 | `401` | Missing or invalid JWT token | `Unauthorized request` |
 | `404` | Department not found | `Not found` |
 | `405` | Wrong HTTP method (e.g. POST, GET) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### GET /users/search
+
+Search users by userName for autocomplete. Returns up to 5 matching active users.
+
+- **URL:** `/api/users/search`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Query Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `q` | string | Yes | Trimmed, 1–100 chars | Search term to match against userName (LIKE) |
+
+#### Request Headers
+
+| Header | Required | Description |
+|---|---|---|
+| `Authorization` | Yes | `Bearer <token>` |
+
+#### Example Request
+
+```http
+GET /api/users/search?q=john HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Users retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Users retrieved successfully",
+  "data": {
+    "users": [
+      {
+        "userId": 1,
+        "userName": "john.doe"
+      },
+      {
+        "userId": 3,
+        "userName": "johnny"
+      }
+    ]
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid query parameters (missing `q`) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
 | `429` | Too many requests | `Too many requests, please try again later` |
 
 ---
