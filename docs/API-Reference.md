@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-08-27 (User Search API added)
+> **Last Updated:** 2026-08-29 (Generalized Entity Search API)
 
 ---
 
@@ -16,7 +16,7 @@
 | `POST /api/departments` | `{ "department": "Engineering", "hod": 3, "isActive": true }` | `{ "success": true, "message": "Department created successfully", "data": { "department": { "id": 1, "department": "Engineering", "hod": 3, "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
 | `GET /api/departments?page=1&limit=10` | — | `{ "success": true, "message": "Departments retrieved successfully", "data": { "departments": [{ "id": 1, "department": "Engineering", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/departments/:id` | — | `{ "success": true, "message": "Department deleted successfully", "data": { "department": { "id": 1, "department": "Engineering", "isActive": 0 } } }` |
-| `GET /api/users/search?q=john` | — | `{ "success": true, "message": "Users retrieved successfully", "data": { "users": [{ "userId": 1, "userName": "john.doe" }] } }` |
+| `GET /api/users/search?q=john&searchFor=user` | — | `{ "success": true, "message": "Search results retrieved successfully", "data": { "results": [{ "id": 1, "label": "john.doe" }], "users": [{ "userId": 1, "userName": "john.doe" }] } }` |
 | `POST /api/designations` | `{ "designation": "Senior Engineer", "isActive": true }` | `{ "success": true, "message": "Designation created successfully", "data": { "designation": { "id": 1, "designation": "Senior Engineer", "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
 | `GET /api/designations?page=1&limit=10` | — | `{ "success": true, "message": "Designations retrieved successfully", "data": { "designations": [{ "id": 1, "designation": "Senior Engineer", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/designations/:id` | — | `{ "success": true, "message": "Designation deleted successfully", "data": { "designation": { "id": 1, "designation": "Senior Engineer", "isActive": 0 } } }` |
@@ -695,7 +695,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ### GET /users/search
 
-Search users by userName for autocomplete. Returns up to 5 matching active users.
+Generalized entity search for autocomplete. Supports searching across users, departments, and designations. Returns up to 5 matching active records.
 
 - **URL:** `/api/users/search`
 - **Method:** `GET`
@@ -704,9 +704,10 @@ Search users by userName for autocomplete. Returns up to 5 matching active users
 
 #### Query Parameters
 
-| Parameter | Type | Required | Constraints | Description |
-|---|---|---|---|---|
-| `q` | string | Yes | Trimmed, 1–100 chars | Search term to match against userName (LIKE) |
+| Parameter | Type | Required | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `q` | string | Yes | — | Trimmed, 1–100 chars | Search term (LIKE match against the entity's name/title) |
+| `searchFor` | string | No | `"user"` | One of: `user`, `department`, `designation` | Entity type to search |
 
 #### Request Headers
 
@@ -714,42 +715,93 @@ Search users by userName for autocomplete. Returns up to 5 matching active users
 |---|---|---|
 | `Authorization` | Yes | `Bearer <token>` |
 
-#### Example Request
+#### Example Request — User Search
 
 ```http
-GET /api/users/search?q=john HTTP/1.1
+GET /api/users/search?q=john&searchFor=user HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
-#### Success Response
+#### Example Request — Department Search
+
+```http
+GET /api/users/search?q=eng&searchFor=department HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Example Request — Designation Search
+
+```http
+GET /api/users/search?q=senior&searchFor=designation HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response (user search)
 
 - **Status:** `200 OK`
-- **Message:** `Users retrieved successfully`
+- **Message:** `Search results retrieved successfully`
 
 ```json
 {
   "success": true,
-  "message": "Users retrieved successfully",
+  "message": "Search results retrieved successfully",
   "data": {
+    "results": [
+      { "id": 1, "label": "john.doe" },
+      { "id": 3, "label": "johnny" }
+    ],
     "users": [
-      {
-        "userId": 1,
-        "userName": "john.doe"
-      },
-      {
-        "userId": 3,
-        "userName": "johnny"
-      }
+      { "userId": 1, "userName": "john.doe" },
+      { "userId": 3, "userName": "johnny" }
     ]
   }
 }
 ```
 
+#### Success Response (department search)
+
+```json
+{
+  "success": true,
+  "message": "Search results retrieved successfully",
+  "data": {
+    "results": [
+      { "id": 1, "label": "Engineering" },
+      { "id": 5, "label": "Engineering Support" }
+    ],
+    "users": []
+  }
+}
+```
+
+#### Success Response (designation search)
+
+```json
+{
+  "success": true,
+  "message": "Search results retrieved successfully",
+  "data": {
+    "results": [
+      { "id": 2, "label": "Senior Engineer" },
+      { "id": 7, "label": "Senior Manager" }
+    ],
+    "users": []
+  }
+}
+```
+
+#### Response Fields
+
+| Field | Type | Description |
+|---|---|---| 
+| `results` | `Array<{ id: number, label: string, sublabel?: string }>` | Generic search results — use `id` and `label` for any entity type |
+| `users` | `Array<{ userId: number, userName: string }>` | Legacy user-specific results (populated only when `searchFor=user`), kept for backward compatibility |
+
 #### Error Responses
 
 | Status | Condition | Message |
 |---|---|---|
-| `400` | Invalid query parameters (missing `q`) | `Unexpected request` |
+| `400` | Invalid query parameters (missing `q`, invalid `searchFor`) | `Unexpected request` |
 | `401` | Missing or invalid JWT token | `Unauthorized request` |
 | `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
 | `429` | Too many requests | `Too many requests, please try again later` |

@@ -29,6 +29,7 @@ export const MESSAGES = {
   DESIGNATIONS_RETRIEVED: "Designations retrieved successfully",
   DESIGNATION_DELETED: "Designation deleted successfully",
   USERS_SEARCH_RETRIEVED: "Users retrieved successfully",
+  ENTITY_SEARCH_RETRIEVED: "Search results retrieved successfully",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",
