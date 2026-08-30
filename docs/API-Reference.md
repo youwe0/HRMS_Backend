@@ -20,7 +20,7 @@
 | `POST /api/designations` | `{ "designation": "Senior Engineer", "isActive": true }` | `{ "success": true, "message": "Designation created successfully", "data": { "designation": { "id": 1, "designation": "Senior Engineer", "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
 | `GET /api/designations?page=1&limit=10` | — | `{ "success": true, "message": "Designations retrieved successfully", "data": { "designations": [{ "id": 1, "designation": "Senior Engineer", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/designations/:id` | — | `{ "success": true, "message": "Designation deleted successfully", "data": { "designation": { "id": 1, "designation": "Senior Engineer", "isActive": 0 } } }` |
-| `GET /api/resource-bundle` | — | `{ "success": true, "message": "Resource bundle retrieved successfully", "data": { "Blood_group": ["A+", "A-", ...], "Gender": ["Male", "Female", "Other"] } }` |
+| `GET /api/resource-bundle` | — | `{ "success": true, "message": "Resource bundle retrieved successfully", "data": { "Blood_group": ["A+", "A-", ...], "Gender": ["Male", "Female", "Other"], "Employee_type": ["Permanent", "Probation", ...] } }` |
 | `POST /api/leave-types` | `{ "leaveName": "Annual Leave", "leaveCode": "AL", "applicableFor": "All employees" }` | `{ "success": true, "message": "Leave type created successfully", "data": { "leaveType": { "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL", "applicableFor": "All employees", "createdBy": 1, "createdAt": "..." } } }` |
 | `GET /api/leave-types?page=1&limit=10` | — | `{ "success": true, "message": "Leave types retrieved successfully", "data": { "leaveTypes": [{ "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL" }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/leave-types/:id` | — | `{ "success": true, "message": "Leave type deleted successfully", "data": { "leaveType": { "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL" } } }` |
@@ -937,6 +937,12 @@ GET /api/resource-bundle HTTP/1.1
       "Male",
       "Female",
       "Other"
+    ],
+    "Employee_type": [
+      "Permanent",
+      "Probation",
+      "Contractor",
+      "OffRole"
     ]
   }
 }
