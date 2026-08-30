@@ -3,3 +3,4 @@ export * as employeeController from "./employee.controller.js";
 export * as departmentController from "./department.controller.js";
 export * as userController from "./user.controller.js";
 export * as designationController from "./designation.controller.js";
+export * as resourceBundleController from "./resourceBundle.controller.js";

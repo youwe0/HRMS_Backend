@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-08-29 (Generalized Entity Search API)
+> **Last Updated:** 2026-08-30 (Resource Bundle API)
 
 ---
 
@@ -20,6 +20,7 @@
 | `POST /api/designations` | `{ "designation": "Senior Engineer", "isActive": true }` | `{ "success": true, "message": "Designation created successfully", "data": { "designation": { "id": 1, "designation": "Senior Engineer", "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
 | `GET /api/designations?page=1&limit=10` | — | `{ "success": true, "message": "Designations retrieved successfully", "data": { "designations": [{ "id": 1, "designation": "Senior Engineer", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/designations/:id` | — | `{ "success": true, "message": "Designation deleted successfully", "data": { "designation": { "id": 1, "designation": "Senior Engineer", "isActive": 0 } } }` |
+| `GET /api/resource-bundle` | — | `{ "success": true, "message": "Resource bundle retrieved successfully", "data": { "Blood_group": ["A+", "A-", ...], "Gender": ["Male", "Female", "Other"] } }` |
 
 ---
 
@@ -39,6 +40,7 @@
    - [GET /designations](#get-designations)
    - [DELETE /designations/:id](#delete-designationsid)
    - [GET /users/search](#get-userssearch)
+   - [GET /resource-bundle](#get-resource-bundle)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -851,6 +853,7 @@ All messages are centralized in `src/constants/messages.js`. **Never hardcode er
 | `DESIGNATION_CREATED` | `Designation created successfully` | Successful designation creation |
 | `DESIGNATIONS_RETRIEVED` | `Designations retrieved successfully` | Successful designations retrieval |
 | `DESIGNATION_DELETED` | `Designation deleted successfully` | Successful designation deletion |
+| `RESOURCE_BUNDLE_RETRIEVED` | `Resource bundle retrieved successfully` | Successful resource bundle retrieval |
 | `INTERNAL_SERVER_ERROR` | `Internal server error` | Unhandled errors (500) |
 
 ---
@@ -886,6 +889,59 @@ router.post(
 
 router.all("/your-endpoint", wrongMethod(["POST"])); // 5. Wrong method catch
 ```
+
+---
+
+### GET /resource-bundle
+
+Retrieve all static lookup data (blood groups, genders, etc.) in a single response.
+
+- **URL:** `/api/resource-bundle`
+- **Method:** `GET`
+- **Auth Required:** No (public endpoint)
+- **Rate Limited:** Yes (global rate limiter)
+
+#### Example Request
+
+```http
+GET /api/resource-bundle HTTP/1.1
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Resource bundle retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Resource bundle retrieved successfully",
+  "data": {
+    "Blood_group": [
+      "A+",
+      "A-",
+      "B+",
+      "B-",
+      "O+",
+      "O-",
+      "AB+",
+      "AB-"
+    ],
+    "Gender": [
+      "Male",
+      "Female",
+      "Other"
+    ]
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
 
 ---
 

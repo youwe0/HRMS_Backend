@@ -28,6 +28,7 @@ export const MESSAGES = {
   DESIGNATION_CREATED: "Designation created successfully",
   DESIGNATIONS_RETRIEVED: "Designations retrieved successfully",
   DESIGNATION_DELETED: "Designation deleted successfully",
+  RESOURCE_BUNDLE_RETRIEVED: "Resource bundle retrieved successfully",
   USERS_SEARCH_RETRIEVED: "Users retrieved successfully",
   ENTITY_SEARCH_RETRIEVED: "Search results retrieved successfully",
 
