@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-08-30 (Resource Bundle API)
+> **Last Updated:** 2026-08-30 (Leave Types API)
 
 ---
 
@@ -21,6 +21,9 @@
 | `GET /api/designations?page=1&limit=10` | — | `{ "success": true, "message": "Designations retrieved successfully", "data": { "designations": [{ "id": 1, "designation": "Senior Engineer", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/designations/:id` | — | `{ "success": true, "message": "Designation deleted successfully", "data": { "designation": { "id": 1, "designation": "Senior Engineer", "isActive": 0 } } }` |
 | `GET /api/resource-bundle` | — | `{ "success": true, "message": "Resource bundle retrieved successfully", "data": { "Blood_group": ["A+", "A-", ...], "Gender": ["Male", "Female", "Other"] } }` |
+| `POST /api/leave-types` | `{ "leaveName": "Annual Leave", "leaveCode": "AL", "applicableFor": "All employees" }` | `{ "success": true, "message": "Leave type created successfully", "data": { "leaveType": { "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL", "applicableFor": "All employees", "createdBy": 1, "createdAt": "..." } } }` |
+| `GET /api/leave-types?page=1&limit=10` | — | `{ "success": true, "message": "Leave types retrieved successfully", "data": { "leaveTypes": [{ "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL" }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
+| `DELETE /api/leave-types/:id` | — | `{ "success": true, "message": "Leave type deleted successfully", "data": { "leaveType": { "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL" } } }` |
 
 ---
 
@@ -41,6 +44,9 @@
    - [DELETE /designations/:id](#delete-designationsid)
    - [GET /users/search](#get-userssearch)
    - [GET /resource-bundle](#get-resource-bundle)
+   - [POST /leave-types](#post-leave-types)
+   - [GET /leave-types](#get-leave-types)
+   - [DELETE /leave-types/:id](#delete-leave-typesid)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -941,6 +947,187 @@ GET /api/resource-bundle HTTP/1.1
 | Status | Condition | Message |
 |---|---|---|
 | `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### POST /leave-types
+
+Create a new leave type.
+
+- **URL:** `/api/leave-types`
+- **Method:** `POST`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** Yes (auth rate limiter)
+
+#### Request Body
+
+| Field | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `leaveName` | string | Yes | Trimmed, 1–200 chars | Name of the leave type |
+| `leaveCode` | string | Yes | Trimmed, 1–50 chars | Short code for the leave type |
+| `applicableFor` | string | No | Trimmed, max 200 chars, nullable | Who this leave applies to |
+
+#### Example Request
+
+```http
+POST /api/leave-types HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "leaveName": "Annual Leave",
+  "leaveCode": "AL",
+  "applicableFor": "All employees"
+}
+```
+
+#### Success Response
+
+- **Status:** `201 Created`
+- **Message:** `Leave type created successfully`
+
+```json
+{
+  "success": true,
+  "message": "Leave type created successfully",
+  "data": {
+    "leaveType": {
+      "id": 1,
+      "leaveName": "Annual Leave",
+      "leaveCode": "AL",
+      "applicableFor": "All employees",
+      "createdBy": 1,
+      "createdAt": "2026-08-30T10:30:00.000Z"
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Validation failed (missing leaveName/leaveCode) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. GET, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### GET /leave-types
+
+Retrieve a paginated list of leave types.
+
+- **URL:** `/api/leave-types`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Query Parameters
+
+| Parameter | Type | Required | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `page` | integer | No | `1` | Min: `1` | Page number to retrieve |
+| `limit` | integer | No | `10` | Min: `1`, Max: `50` | Number of records per page |
+
+#### Example Request
+
+```http
+GET /api/leave-types?page=1&limit=10 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Leave types retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Leave types retrieved successfully",
+  "data": {
+    "leaveTypes": [
+      {
+        "id": 1,
+        "leaveName": "Annual Leave",
+        "leaveCode": "AL",
+        "applicableFor": "All employees",
+        "createdBy": 1,
+        "createdAt": "2026-08-30T10:30:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 5,
+      "totalPages": 1
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid query parameters | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### DELETE /leave-types/:id
+
+Delete a leave type.
+
+- **URL:** `/api/leave-types/:id`
+- **Method:** `DELETE`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Path Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `id` | integer | Yes | Positive integer | ID of the leave type to delete |
+
+#### Example Request
+
+```http
+DELETE /api/leave-types/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Leave type deleted successfully`
+
+```json
+{
+  "success": true,
+  "message": "Leave type deleted successfully",
+  "data": {
+    "leaveType": {
+      "id": 1,
+      "leaveName": "Annual Leave",
+      "leaveCode": "AL"
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid ID parameter (e.g. non-numeric) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `404` | Leave type not found | `Not found` |
+| `405` | Wrong HTTP method (e.g. POST, GET) | `Wrong method` |
 | `429` | Too many requests | `Too many requests, please try again later` |
 
 ---

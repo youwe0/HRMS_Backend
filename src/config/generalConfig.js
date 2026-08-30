@@ -6,3 +6,10 @@
 export const Blood_group = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
 export const Gender = ["Male", "Female", "Other"];
+
+export const Employee_type = [
+  "Permanent",
+  "Probation",
+  "Contractor",
+  "OffRole",
+];

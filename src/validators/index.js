@@ -3,3 +3,4 @@ export * as employeeValidators from "./employee.validator.js";
 export * as departmentValidators from "./department.validator.js";
 export * as userValidators from "./user.validator.js";
 export * as designationValidators from "./designation.validator.js";
+export * as leaveTypeValidators from "./leaveType.validator.js";

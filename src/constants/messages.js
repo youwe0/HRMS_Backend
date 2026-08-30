@@ -31,6 +31,9 @@ export const MESSAGES = {
   RESOURCE_BUNDLE_RETRIEVED: "Resource bundle retrieved successfully",
   USERS_SEARCH_RETRIEVED: "Users retrieved successfully",
   ENTITY_SEARCH_RETRIEVED: "Search results retrieved successfully",
+  LEAVE_TYPE_CREATED: "Leave type created successfully",
+  LEAVE_TYPES_RETRIEVED: "Leave types retrieved successfully",
+  LEAVE_TYPE_DELETED: "Leave type deleted successfully",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",
