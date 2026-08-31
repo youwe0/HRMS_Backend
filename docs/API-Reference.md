@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-08-30 (Leave Types API)
+> **Last Updated:** 2026-08-31 (Update Data API)
 
 ---
 
@@ -24,6 +24,8 @@
 | `POST /api/leave-types` | `{ "leaveName": "Annual Leave", "leaveCode": "AL", "applicableFor": "All employees" }` | `{ "success": true, "message": "Leave type created successfully", "data": { "leaveType": { "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL", "applicableFor": "All employees", "createdBy": 1, "createdAt": "..." } } }` |
 | `GET /api/leave-types?page=1&limit=10` | — | `{ "success": true, "message": "Leave types retrieved successfully", "data": { "leaveTypes": [{ "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL" }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/leave-types/:id` | — | `{ "success": true, "message": "Leave type deleted successfully", "data": { "leaveType": { "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL" } } }` |
+| `GET /api/userDetail/:section` | — | `{ "success": true, "message": "...", "data": { "<sectionData>": { ... } } }` |
+| `PUT /api/userDetail/:userId/:section` | `{ "employeeCode": "EC001", "department": "Engineering", "designation": "Senior Engineer", "dateOfJoining": "2024-01-15" }` | `{ "success": true, "message": "Employment details updated successfully", "data": { "employmentDetails": { ... } } }` |
 
 ---
 
@@ -47,6 +49,8 @@
    - [POST /leave-types](#post-leave-types)
    - [GET /leave-types](#get-leave-types)
    - [DELETE /leave-types/:id](#delete-leave-typesid)
+   - [GET /userDetail/:section](#get-userdetailsection)
+   - [PUT /userDetail/:userId/:section](#put-userdetailuseridsection)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -816,6 +820,196 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ---
 
+### GET /userDetail/:section
+
+A **single parameterized endpoint** that returns user detail data based on the `:section` path parameter. New sections (contact, education, etc.) are added by registering a handler in the controller — no new routes needed.
+
+- **URL:** `/api/userDetail/:section`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+> The user ID is extracted from the JWT token payload — no request body or query params needed.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `section` | string | Yes | The detail section to retrieve. Currently supported: `employment-details` |
+
+#### Request Headers
+
+| Header | Required | Description |
+|---|---|---|
+| `Authorization` | Yes | `Bearer <token>` |
+
+#### Example Request — Employment Details
+
+```http
+GET /api/userDetail/employment-details HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response (employment-details)
+
+- **Status:** `200 OK`
+- **Message:** `Employment details retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Employment details retrieved successfully",
+  "data": {
+    "employmentDetails": {
+      "employeeCode": "EC001",
+      "department": "Engineering",
+      "designation": "Senior Engineer",
+      "dateOfJoining": "2024-01-15"
+    }
+  }
+}
+```
+
+#### Response Fields (employment-details)
+
+| Field | Type | Description |
+|---|---|---|
+| `employmentDetails.employeeCode` | string | Unique employee code (e.g. `"EC001"`) |
+| `employmentDetails.department` | string | Department name |
+| `employmentDetails.designation` | string | Designation / job title |
+| `employmentDetails.dateOfJoining` | string | Date of joining (ISO 8601 date) |
+
+#### Adding a New Section
+
+1. Create a service in `src/services/<section>.service.js` with a `getByUserId({ userId })` method.
+2. Export it from `src/services/index.js`.
+3. Register it in the `sections` map in `src/controllers/userDetail.controller.js`:
+   ```js
+   "contact-details": {
+     fetch: (userId) => contactDetailsService.getContactDetailsByUserId({ userId }),
+     dataKey: "contactDetails",
+     message: MESSAGES.CONTACT_DETAILS_RETRIEVED,
+   },
+   ```
+4. Add the message constant to `src/constants/messages.js`.
+5. That's it — no new routes, no new controller files.
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `404` | Unknown section name | `Unknown section: "xyz". Valid sections: employment-details` |
+| `404` | No data found for the section | `<dataKey> not found for this user` |
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### PUT /userDetail/:userId/:section
+
+A **parameterized upsert endpoint** that creates or updates user detail data based on the `:section` path parameter. New sections are added by registering an upsert handler in the controller.
+
+- **URL:** `/api/userDetail/:userId/:section`
+- **Method:** `PUT`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+> The `:userId` identifies the target user. The `:section` determines which table to update. If a record exists for the userId, it is updated; otherwise a new record is inserted.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `userId` | integer | Yes | The ID of the target user (positive integer) |
+| `section` | string | Yes | The detail section to update. Currently supported: `employment-details` |
+
+#### Request Headers
+
+| Header | Required | Description |
+|---|---|---|
+| `Authorization` | Yes | `Bearer <token>` |
+
+#### Request Body — employment-details
+
+| Field | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `employeeCode` | string | Yes | Trimmed, 1–20 chars, unique | Unique employee code (e.g. `"EC001"`) |
+| `department` | string | Yes | Trimmed, 1–200 chars | Department name |
+| `designation` | string | Yes | Trimmed, 1–200 chars | Designation / job title |
+| `dateOfJoining` | string | Yes | ISO 8601 date | Date of joining |
+| `createdBy` | integer | No | Positive integer | Defaults to the authenticated user's ID |
+
+#### Example Request — Employment Details
+
+```http
+PUT /api/userDetail/1/employment-details HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "employeeCode": "EC001",
+  "department": "Engineering",
+  "designation": "Senior Engineer",
+  "dateOfJoining": "2024-01-15"
+}
+```
+
+#### Success Response (employment-details)
+
+- **Status:** `200 OK`
+- **Message:** `Employment details updated successfully`
+
+```json
+{
+  "success": true,
+  "message": "Employment details updated successfully",
+  "data": {
+    "employmentDetails": {
+      "id": 1,
+      "userId": 1,
+      "employeeCode": "EC001",
+      "department": "Engineering",
+      "designation": "Senior Engineer",
+      "dateOfJoining": "2024-01-15",
+      "createdBy": 1,
+      "createdAt": "2024-01-15T10:30:00.000Z"
+    }
+  }
+}
+```
+
+#### Adding a New Update Section
+
+1. Create an upsert method in `src/services/<section>.service.js` with an `upsert({ userId, data, createdBy })` signature.
+2. Export it from `src/services/index.js`.
+3. Register it in the `updateSections` map in `src/controllers/userDetail.controller.js`:
+   ```js
+   "contact-details": {
+     upsert: (userId, data, createdBy) =>
+       contactDetailsService.upsertContactDetails({ userId, data, createdBy }),
+     dataKey: "contactDetails",
+     message: MESSAGES.CONTACT_DETAILS_UPDATED,
+   },
+   ```
+4. Add a Joi validation schema in the corresponding validator file.
+5. Import and use the schema in `routes/userDetail.routes.js`.
+6. Add the message constant to `src/constants/messages.js`.
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid userId (non-numeric, negative) | `Invalid userId: "xyz". Must be a positive integer.` |
+| `400` | Validation failed (missing required fields) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `404` | Unknown section name | `Unknown section: "xyz". Valid sections: employment-details` |
+| `405` | Wrong HTTP method (e.g. GET, POST) | `Wrong method` |
+| `409` | Duplicate EmployeeCode for a different user | `Conflict` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
 ## Error Codes Reference
 
 | HTTP Status | Constant | When Used |
@@ -859,6 +1053,8 @@ All messages are centralized in `src/constants/messages.js`. **Never hardcode er
 | `DESIGNATION_CREATED` | `Designation created successfully` | Successful designation creation |
 | `DESIGNATIONS_RETRIEVED` | `Designations retrieved successfully` | Successful designations retrieval |
 | `DESIGNATION_DELETED` | `Designation deleted successfully` | Successful designation deletion |
+| `EMPLOYMENT_DETAILS_RETRIEVED` | `Employment details retrieved successfully` | Successful employment details retrieval |
+| `EMPLOYMENT_DETAILS_UPDATED` | `Employment details updated successfully` | Successful employment details update |
 | `RESOURCE_BUNDLE_RETRIEVED` | `Resource bundle retrieved successfully` | Successful resource bundle retrieval |
 | `INTERNAL_SERVER_ERROR` | `Internal server error` | Unhandled errors (500) |
 

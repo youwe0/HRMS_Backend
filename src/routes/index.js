@@ -7,6 +7,7 @@ import userRoutes from "./user.routes.js";
 import designationRoutes from "./designation.routes.js";
 import leaveTypeRoutes from "./leaveType.routes.js";
 import resourceBundleRoutes from "./resourceBundle.routes.js";
+import userDetailRoutes from "./userDetail.routes.js";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use("/users", userRoutes);
 router.use("/designations", designationRoutes);
 router.use("/leave-types", leaveTypeRoutes);
 router.use("/", resourceBundleRoutes);
+router.use("/userDetail", userDetailRoutes);
 
 export default router;

@@ -5,3 +5,5 @@ export * as userController from "./user.controller.js";
 export * as designationController from "./designation.controller.js";
 export * as leaveTypeController from "./leaveType.controller.js";
 export * as resourceBundleController from "./resourceBundle.controller.js";
+export * as employmentDetailsController from "./employmentDetails.controller.js";
+export * as userDetailController from "./userDetail.controller.js";

@@ -34,6 +34,8 @@ export const MESSAGES = {
   LEAVE_TYPE_CREATED: "Leave type created successfully",
   LEAVE_TYPES_RETRIEVED: "Leave types retrieved successfully",
   LEAVE_TYPE_DELETED: "Leave type deleted successfully",
+  EMPLOYMENT_DETAILS_RETRIEVED: "Employment details retrieved successfully",
+  EMPLOYMENT_DETAILS_UPDATED: "Employment details updated successfully",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",
