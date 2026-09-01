@@ -13,3 +13,5 @@ export const Employee_type = [
   "Contractor",
   "OffRole",
 ];
+
+export const HolidayBasedOnType = ["State", "City", "Zone"];
