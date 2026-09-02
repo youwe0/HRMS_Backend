@@ -26,6 +26,12 @@ export const validate =
       );
     }
 
-    req[source] = value;
+    // Express 5 makes req.query a read-only getter — skip reassignment
+    // to avoid TypeError. The validated value is still available via Joi.
+    try {
+      req[source] = value;
+    } catch {
+      // req.query is a getter in Express 5 — cannot be overwritten
+    }
     return next();
   };

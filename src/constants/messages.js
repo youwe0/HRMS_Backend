@@ -38,6 +38,10 @@ export const MESSAGES = {
   EMPLOYMENT_DETAILS_UPDATED: "Employment details updated successfully",
   COMPANY_MASTER_CONFIG_CREATED: "Company master config saved successfully",
   COMPANY_MASTER_CONFIG_RETRIEVED: "Company master config retrieved successfully",
+  ATTENDANCE_CLOCKED_IN: "Clock-in recorded successfully",
+  ATTENDANCE_CLOCKED_OUT: "Clock-out recorded successfully",
+  ATTENDANCE_COMPLETED: "Attendance completed, try tomorrow",
+  ATTENDANCE_RETRIEVED: "Attendance retrieved successfully",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",

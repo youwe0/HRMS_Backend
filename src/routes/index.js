@@ -9,6 +9,7 @@ import leaveTypeRoutes from "./leaveType.routes.js";
 import resourceBundleRoutes from "./resourceBundle.routes.js";
 import userDetailRoutes from "./userDetail.routes.js";
 import companyMasterConfigRoutes from "./companyMasterConfig.routes.js";
+import attendanceRoutes from "./attendance.routes.js";
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use("/leave-types", leaveTypeRoutes);
 router.use("/", resourceBundleRoutes);
 router.use("/userDetail", userDetailRoutes);
 router.use("/company-master-config", companyMasterConfigRoutes);
+router.use("/attendance", attendanceRoutes);
 
 export default router;

@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-09-02 (CompanyMasterConfig API)
+> **Last Updated:** 2026-09-02 (Attendance API)
 
 ---
 
@@ -27,6 +27,8 @@
 | `GET /api/userDetail/:section` | — | `{ "success": true, "message": "...", "data": { "<sectionData>": { ... } } }` || `PUT /api/userDetail/:userId/:section` | `{ "employeeCode": "EC001", "department": "Engineering", "designation": "Senior Engineer", "dateOfJoining": "2024-01-15" }` | `{ "success": true, "message": "Employment details updated successfully", "data": { "employmentDetails": { ... } } }` |
 | `POST /api/company-master-config` | `{ "moduleName": "Holiday_Based_On_Type", "basedOn": "State" }` | `{ "success": true, "message": "Company master config saved successfully", "data": { "config": { "id": 1, "moduleName": "Holiday_Based_On_Type", "basedOn": "State", ... } } }` |
 | `GET /api/company-master-config` | — | `{ "success": true, "message": "Company master config retrieved successfully", "data": { "configs": [...] } }` |
+| `POST /api/attendance/:userId` | `{ "clockTime": "2026-09-02T09:00:00.000Z" }` | `{ "success": true, "message": "Clock-in recorded successfully", "data": { "attendance": { "employeeCode": "EC001", "attendanceDate": "...", "clockIn": "...", "clockOut": null } } }` |
+| `GET /api/attendance/:userId?fromDate=2026-09-01&toDate=2026-09-30` | — | `{ "success": true, "message": "Attendance retrieved successfully", "data": { "attendance": [...] } }` |
 
 
 
@@ -56,6 +58,8 @@
    - [PUT /userDetail/:userId/:section](#put-userdetailuseridsection)
    - [POST /company-master-config](#post-company-master-config)
    - [GET /company-master-config](#get-company-master-config)
+   - [POST /attendance/:userId](#post-attendanceuserid)
+   - [GET /attendance/:userId](#get-attendanceuserid)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -1127,6 +1131,170 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ---
 
+### POST /attendance/:userId
+
+Record a clock-in or clock-out event for the authenticated user.
+
+- **URL:** `/api/attendance/:userId`
+- **Method:** `POST`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** Yes (auth rate limiter)
+
+#### Path Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `userId` | integer | Yes | Positive integer | The user ID (must match the JWT owner) |
+
+#### Request Body
+
+| Field | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `clockTime` | string | Yes | ISO 8601 datetime | The timestamp of the clock event |
+
+#### Example Request
+
+```http
+POST /api/attendance/1 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "clockTime": "2026-09-02T09:00:00.000Z"
+}
+```
+
+#### Success Response — Clock In
+
+- **Status:** `200 OK`
+- **Message:** `Clock-in recorded successfully`
+
+```json
+{
+  "success": true,
+  "message": "Clock-in recorded successfully",
+  "data": {
+    "attendance": {
+      "employeeCode": "EC001",
+      "attendanceDate": "2026-09-02T00:00:00.000Z",
+      "clockIn": "2026-09-02T09:00:00.000Z",
+      "clockOut": null,
+      "status": null
+    }
+  }
+}
+```
+
+#### Success Response — Clock Out
+
+- **Status:** `200 OK`
+- **Message:** `Clock-out recorded successfully`
+
+```json
+{
+  "success": true,
+  "message": "Clock-out recorded successfully",
+  "data": {
+    "attendance": {
+      "employeeCode": "EC001",
+      "attendanceDate": "2026-09-02T00:00:00.000Z",
+      "clockIn": "2026-09-02T09:00:00.000Z",
+      "clockOut": "2026-09-02T17:30:00.000Z",
+      "status": null
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Validation failed (missing clockTime, invalid userId) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `404` | No employment details found for the user | `Employment details not found for this user` |
+| `405` | Wrong HTTP method (e.g. GET, PUT) | `Wrong method` |
+| `409` | Attendance already completed for today | `Attendance completed, try tomorrow` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### GET /attendance/:userId
+
+Retrieve attendance records for a user within a date range.
+
+- **URL:** `/api/attendance/:userId`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Path Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `userId` | integer | Yes | Positive integer | The user ID |
+
+#### Query Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `fromDate` | string | Yes | ISO 8601 date | Start date (YYYY-MM-DD) |
+| `toDate` | string | Yes | ISO 8601 date | End date (YYYY-MM-DD) |
+
+#### Example Request
+
+```http
+GET /api/attendance/1?fromDate=2026-09-01&toDate=2026-09-30 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Attendance retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Attendance retrieved successfully",
+  "data": {
+    "attendance": [
+      {
+        "employeeCode": "EC001",
+        "attendanceDate": "2026-09-02T00:00:00.000Z",
+        "shift": null,
+        "clockIn": "2026-09-02T09:00:00.000Z",
+        "clockOut": "2026-09-02T17:30:00.000Z",
+        "status": null,
+        "isActive": 1,
+        "createdAt": "2026-09-02T09:00:00.000Z"
+      },
+      {
+        "employeeCode": "EC001",
+        "attendanceDate": "2026-09-01T00:00:00.000Z",
+        "shift": null,
+        "clockIn": "2026-09-01T08:55:00.000Z",
+        "clockOut": "2026-09-01T17:25:00.000Z",
+        "status": null,
+        "isActive": 1,
+        "createdAt": "2026-09-01T08:55:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Validation failed (missing fromDate/toDate, invalid userId) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
 ## Error Codes Reference
 
 | HTTP Status | Constant | When Used |
@@ -1174,6 +1342,10 @@ All messages are centralized in `src/constants/messages.js`. **Never hardcode er
 | `EMPLOYMENT_DETAILS_UPDATED` | `Employment details updated successfully` | Successful employment details update |
 | `COMPANY_MASTER_CONFIG_CREATED` | `Company master config saved successfully` | Successful company master config save |
 | `COMPANY_MASTER_CONFIG_RETRIEVED` | `Company master config retrieved successfully` | Successful company master config retrieval |
+| `ATTENDANCE_CLOCKED_IN` | `Clock-in recorded successfully` | Successful clock-in |
+| `ATTENDANCE_CLOCKED_OUT` | `Clock-out recorded successfully` | Successful clock-out |
+| `ATTENDANCE_COMPLETED` | `Attendance completed, try tomorrow` | Attendance already completed for today |
+| `ATTENDANCE_RETRIEVED` | `Attendance retrieved successfully` | Successful attendance retrieval |
 | `RESOURCE_BUNDLE_RETRIEVED` | `Resource bundle retrieved successfully` | Successful resource bundle retrieval |
 | `INTERNAL_SERVER_ERROR` | `Internal server error` | Unhandled errors (500) |
 
