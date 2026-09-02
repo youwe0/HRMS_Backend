@@ -7,3 +7,4 @@ export * as leaveTypeController from "./leaveType.controller.js";
 export * as resourceBundleController from "./resourceBundle.controller.js";
 export * as employmentDetailsController from "./employmentDetails.controller.js";
 export * as userDetailController from "./userDetail.controller.js";
+export * as companyMasterConfigController from "./companyMasterConfig.controller.js";

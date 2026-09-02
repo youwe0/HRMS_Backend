@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-08-31 (Update Data API)
+> **Last Updated:** 2026-09-02 (CompanyMasterConfig API)
 
 ---
 
@@ -24,8 +24,11 @@
 | `POST /api/leave-types` | `{ "leaveName": "Annual Leave", "leaveCode": "AL", "applicableFor": "All employees" }` | `{ "success": true, "message": "Leave type created successfully", "data": { "leaveType": { "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL", "applicableFor": "All employees", "createdBy": 1, "createdAt": "..." } } }` |
 | `GET /api/leave-types?page=1&limit=10` | — | `{ "success": true, "message": "Leave types retrieved successfully", "data": { "leaveTypes": [{ "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL" }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
 | `DELETE /api/leave-types/:id` | — | `{ "success": true, "message": "Leave type deleted successfully", "data": { "leaveType": { "id": 1, "leaveName": "Annual Leave", "leaveCode": "AL" } } }` |
-| `GET /api/userDetail/:section` | — | `{ "success": true, "message": "...", "data": { "<sectionData>": { ... } } }` |
-| `PUT /api/userDetail/:userId/:section` | `{ "employeeCode": "EC001", "department": "Engineering", "designation": "Senior Engineer", "dateOfJoining": "2024-01-15" }` | `{ "success": true, "message": "Employment details updated successfully", "data": { "employmentDetails": { ... } } }` |
+| `GET /api/userDetail/:section` | — | `{ "success": true, "message": "...", "data": { "<sectionData>": { ... } } }` || `PUT /api/userDetail/:userId/:section` | `{ "employeeCode": "EC001", "department": "Engineering", "designation": "Senior Engineer", "dateOfJoining": "2024-01-15" }` | `{ "success": true, "message": "Employment details updated successfully", "data": { "employmentDetails": { ... } } }` |
+| `POST /api/company-master-config` | `{ "moduleName": "Holiday_Based_On_Type", "basedOn": "State" }` | `{ "success": true, "message": "Company master config saved successfully", "data": { "config": { "id": 1, "moduleName": "Holiday_Based_On_Type", "basedOn": "State", ... } } }` |
+| `GET /api/company-master-config` | — | `{ "success": true, "message": "Company master config retrieved successfully", "data": { "configs": [...] } }` |
+
+
 
 ---
 
@@ -51,6 +54,8 @@
    - [DELETE /leave-types/:id](#delete-leave-typesid)
    - [GET /userDetail/:section](#get-userdetailsection)
    - [PUT /userDetail/:userId/:section](#put-userdetailuseridsection)
+   - [POST /company-master-config](#post-company-master-config)
+   - [GET /company-master-config](#get-company-master-config)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -1010,6 +1015,118 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ---
 
+### POST /company-master-config
+
+Upsert a CompanyMasterConfig record. If a record with the same `moduleName` already exists and is active, its `basedOn` value is updated; otherwise a new record is created.
+
+- **URL:** `/api/company-master-config`
+- **Method:** `POST`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** Yes (auth rate limiter)
+
+#### Request Body
+
+| Field | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `moduleName` | string | Yes | Trimmed, 1–200 chars | Name of the module (e.g. `"Holiday_Based_On_Type"`) |
+| `basedOn` | string | Yes | Trimmed, 1–200 chars | The selected value (e.g. `"State"`, `"City"`, `"Zone"`) |
+
+#### Example Request
+
+```http
+POST /api/company-master-config HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "moduleName": "Holiday_Based_On_Type",
+  "basedOn": "State"
+}
+```
+
+#### Success Response
+
+- **Status:** `201 Created`
+- **Message:** `Company master config saved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Company master config saved successfully",
+  "data": {
+    "config": {
+      "id": 1,
+      "moduleName": "Holiday_Based_On_Type",
+      "basedOn": "State",
+      "createdBy": 1,
+      "createdAt": "2026-09-02T10:00:00.000Z",
+      "isActive": 1
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Validation failed (missing moduleName or basedOn) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. GET, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### GET /company-master-config
+
+Retrieve all active CompanyMasterConfig records.
+
+- **URL:** `/api/company-master-config`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Example Request
+
+```http
+GET /api/company-master-config HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Company master config retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Company master config retrieved successfully",
+  "data": {
+    "configs": [
+      {
+        "id": 1,
+        "moduleName": "Holiday_Based_On_Type",
+        "basedOn": "State",
+        "createdBy": 1,
+        "createdAt": "2026-09-02T10:00:00.000Z",
+        "isActive": 1
+      }
+    ]
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
 ## Error Codes Reference
 
 | HTTP Status | Constant | When Used |
@@ -1055,6 +1172,8 @@ All messages are centralized in `src/constants/messages.js`. **Never hardcode er
 | `DESIGNATION_DELETED` | `Designation deleted successfully` | Successful designation deletion |
 | `EMPLOYMENT_DETAILS_RETRIEVED` | `Employment details retrieved successfully` | Successful employment details retrieval |
 | `EMPLOYMENT_DETAILS_UPDATED` | `Employment details updated successfully` | Successful employment details update |
+| `COMPANY_MASTER_CONFIG_CREATED` | `Company master config saved successfully` | Successful company master config save |
+| `COMPANY_MASTER_CONFIG_RETRIEVED` | `Company master config retrieved successfully` | Successful company master config retrieval |
 | `RESOURCE_BUNDLE_RETRIEVED` | `Resource bundle retrieved successfully` | Successful resource bundle retrieval |
 | `INTERNAL_SERVER_ERROR` | `Internal server error` | Unhandled errors (500) |
 
