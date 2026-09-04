@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { authValidators } from "../../../src/validators/index.js";
+import * as authValidators from "../../../src/modules/auth/auth.validator.js";
 
 test("registerSchema accepts a valid payload", () => {
   const { error } = authValidators.registerSchema.validate({

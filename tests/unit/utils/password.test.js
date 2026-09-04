@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { hashPassword, comparePassword } from "../../../src/utils/password.js";
+import { hashPassword, comparePassword } from "../../../src/shared/utils/password.js";
 
 test("hashPassword produces a salted hash and comparePassword matches it", async () => {
   const plain = "SuperSecret123!";

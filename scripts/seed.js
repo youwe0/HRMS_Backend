@@ -15,7 +15,7 @@ import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import sql from "mssql";
-import { ROLES } from "../src/config/roles.js";
+import { ROLES } from "../src/shared/config/roles.js";
 
 dotenv.config();
 

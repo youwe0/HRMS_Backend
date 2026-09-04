@@ -1,9 +1,0 @@
-export * as authValidators from "./auth.validator.js";
-export * as employeeValidators from "./employee.validator.js";
-export * as departmentValidators from "./department.validator.js";
-export * as userValidators from "./user.validator.js";
-export * as designationValidators from "./designation.validator.js";
-export * as leaveTypeValidators from "./leaveType.validator.js";
-export * as employmentDetailsValidators from "./employmentDetails.validator.js";
-export * as companyMasterConfigValidators from "./companyMasterConfig.validator.js";
-export * as attendanceValidators from "./attendance.validator.js";

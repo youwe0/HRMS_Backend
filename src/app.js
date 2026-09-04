@@ -5,14 +5,14 @@ import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 
-import config from "./config/index.js";
+import config from "./shared/config/index.js";
 import routes from "./routes/index.js";
 import {
   globalRateLimiter,
   httpLogger,
   notFoundHandler,
   errorHandler,
-} from "./middlewares/index.js";
+} from "./shared/middlewares/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.resolve(__dirname, "../public");

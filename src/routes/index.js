@@ -1,15 +1,15 @@
 import { Router } from "express";
-import config from "../config/index.js";
-import authRoutes from "./auth.routes.js";
-import employeeRoutes from "./employee.routes.js";
-import departmentRoutes from "./department.routes.js";
-import userRoutes from "./user.routes.js";
-import designationRoutes from "./designation.routes.js";
-import leaveTypeRoutes from "./leaveType.routes.js";
-import resourceBundleRoutes from "./resourceBundle.routes.js";
-import userDetailRoutes from "./userDetail.routes.js";
-import companyMasterConfigRoutes from "./companyMasterConfig.routes.js";
-import attendanceRoutes from "./attendance.routes.js";
+import config from "../shared/config/index.js";
+import authRoutes from "../modules/auth/auth.routes.js";
+import employeeRoutes from "../modules/employee/employee.routes.js";
+import departmentRoutes from "../modules/department/department.routes.js";
+import userRoutes from "../modules/user/user.routes.js";
+import designationRoutes from "../modules/designation/designation.routes.js";
+import leaveTypeRoutes from "../modules/leaveType/leaveType.routes.js";
+import resourceBundleRoutes from "../modules/resourceBundle/resourceBundle.routes.js";
+import userDetailRoutes from "../modules/userDetail/userDetail.routes.js";
+import companyMasterConfigRoutes from "../modules/companyMasterConfig/companyMasterConfig.routes.js";
+import attendanceRoutes from "../modules/attendance/attendance.routes.js";
 
 const router = Router();
 

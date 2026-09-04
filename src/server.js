@@ -1,8 +1,8 @@
 import http from "node:http";
-import config from "./config/index.js";
-import logger from "./utils/logger.js";
-import { initLoaders } from "./loaders/index.js";
-import { disconnectDB } from "./db/connection.js";
+import config from "./shared/config/index.js";
+import logger from "./shared/utils/logger.js";
+import { initLoaders } from "./shared/loaders/index.js";
+import { disconnectDB } from "./shared/db/connection.js";
 
 const startServer = async () => {
   const app = await initLoaders();

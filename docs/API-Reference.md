@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-09-02 (Attendance API)
+> **Last Updated:** 2026-09-04 (Modular Monolith Refactoring — API contracts unchanged)
 
 ---
 
@@ -890,18 +890,19 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 #### Adding a New Section
 
-1. Create a service in `src/services/<section>.service.js` with a `getByUserId({ userId })` method.
-2. Export it from `src/services/index.js`.
-3. Register it in the `sections` map in `src/controllers/userDetail.controller.js`:
+1. Create a service in `src/modules/<section>/<section>.service.js` with a `getByUserId({ userId })` method.
+2. Register it in the `sections` map in `src/modules/userDetail/userDetail.controller.js`:
    ```js
+   import * as contactDetailsService from "../contactDetails/contactDetails.service.js";
+   // ... then in the sections map:
    "contact-details": {
      fetch: (userId) => contactDetailsService.getContactDetailsByUserId({ userId }),
      dataKey: "contactDetails",
      message: MESSAGES.CONTACT_DETAILS_RETRIEVED,
    },
    ```
-4. Add the message constant to `src/constants/messages.js`.
-5. That's it — no new routes, no new controller files.
+3. Add the message constant to `src/shared/constants/messages.js`.
+4. That's it — no new routes, no new controller files.
 
 #### Error Responses
 
@@ -990,10 +991,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 #### Adding a New Update Section
 
-1. Create an upsert method in `src/services/<section>.service.js` with an `upsert({ userId, data, createdBy })` signature.
-2. Export it from `src/services/index.js`.
-3. Register it in the `updateSections` map in `src/controllers/userDetail.controller.js`:
+1. Create an upsert method in `src/modules/<section>/<section>.service.js` with an `upsert({ userId, data, createdBy })` signature.
+2. Register it in the `updateSections` map in `src/modules/userDetail/userDetail.controller.js`:
    ```js
+   import * as contactDetailsService from "../contactDetails/contactDetails.service.js";
+   // ... then in the updateSections map:
    "contact-details": {
      upsert: (userId, data, createdBy) =>
        contactDetailsService.upsertContactDetails({ userId, data, createdBy }),
@@ -1001,9 +1003,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
      message: MESSAGES.CONTACT_DETAILS_UPDATED,
    },
    ```
-4. Add a Joi validation schema in the corresponding validator file.
-5. Import and use the schema in `routes/userDetail.routes.js`.
-6. Add the message constant to `src/constants/messages.js`.
+3. Add a Joi validation schema in the corresponding module's validator file.
+4. Import and use the schema in `src/modules/userDetail/userDetail.routes.js`.
+5. Add the message constant to `src/shared/constants/messages.js`.
 
 #### Error Responses
 
@@ -1313,7 +1315,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ## Common Error Messages
 
-All messages are centralized in `src/constants/messages.js`. **Never hardcode error messages** — always use the `MESSAGES` constants.
+All messages are centralized in `src/shared/constants/messages.js`. **Never hardcode error messages** — always use the `MESSAGES` constants.
 
 | Constant | Value | Used For |
 |---|---|---|
@@ -1368,15 +1370,15 @@ Every route follows this middleware chain (in order):
 Every new route **must** follow this pattern:
 
 ```js
-import { validate, authenticate, wrongMethod, authRateLimiter } from "../middlewares/index.js";
-import { yourValidators } from "../validators/index.js";
-import { yourController } from "../controllers/index.js";
+import { validate, authenticate, wrongMethod, authRateLimiter } from "../../shared/middlewares/index.js";
+import * as yourValidators from "./your.validator.js";
+import * as yourController from "./your.controller.js";
 
 router.post(
   "/your-endpoint",
   authRateLimiter,            // 1. Rate limit
   authenticate,               // 2. JWT auth (skip for public routes)
-  validate(yourSchema),       // 3. Payload validation
+  validate(yourValidators.yourSchema),  // 3. Payload validation
   yourController.method,      // 4. Handler
 );
 
