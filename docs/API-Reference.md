@@ -11,7 +11,7 @@
 | API Endpoint | Sample Payload | Success Response |
 |---|---|---|
 | `POST /api/auth/register` | `{ "userName": "john.doe", "password": "securePass123" }` | `{ "success": true, "message": "Registration successful", "data": { "user": { "id": 5, "userName": "john.doe" } } }` |
-| `POST /api/auth/login` | `{ "userName": "john.doe", "passwordHash": "a9993e36..." }` | `{ "success": true, "message": "Login successful", "data": { "token": "eyJhbGci...", "user": { "id": 1, "userName": "john.doe" } } }` |
+| `POST /api/auth/login` | `{ "userName": "john.doe", "passwordHash": "a9993e36..." }` | `{ "success": true, "message": "Login successful", "data": { "token": "eyJhbGci...", "user": { "id": 1, "userName": "john.doe" }, "permissions": ["employees.view", "departments.view"] } }` |
 | `GET /api/employees?page=1&limit=10` | — | `{ "success": true, "message": "Employees retrieved successfully", "data": { "employees": [...], "pagination": { "page": 1, "limit": 10, "total": 25, "totalPages": 3 } } }` |
 | `POST /api/departments` | `{ "department": "Engineering", "hod": 3, "isActive": true }` | `{ "success": true, "message": "Department created successfully", "data": { "department": { "id": 1, "department": "Engineering", "hod": 3, "createdAt": "...", "createdBy": 1, "isActive": 1 } } }` |
 | `GET /api/departments?page=1&limit=10` | — | `{ "success": true, "message": "Departments retrieved successfully", "data": { "departments": [{ "id": 1, "department": "Engineering", "isActive": 1 }], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
@@ -246,10 +246,20 @@ Content-Type: application/json
     "user": {
       "id": 1,
       "userName": "john.doe"
-    }
+    },
+    "permissions": ["employees.view", "departments.view"]
   }
 }
 ```
+
+#### Response Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `token` | string | JWT access token |
+| `user.id` | integer | The authenticated user's ID |
+| `user.userName` | string | The authenticated user's username |
+| `permissions` | `string[]` | Array of permission `Code` values assigned to the user (from `dbo.Permissions` via the user's `Permissions` JSON column) |
 
 #### Error Responses
 

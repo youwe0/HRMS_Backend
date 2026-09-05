@@ -8,6 +8,10 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 export const login = asyncHandler(async (req, res) => {
-  const { token, user } = await authService.login(req.body);
-  sendSuccess(res, HTTP_STATUS.OK, MESSAGES.LOGIN_SUCCESS, { token, user });
+  const { token, user, permissions } = await authService.login(req.body);
+  sendSuccess(res, HTTP_STATUS.OK, MESSAGES.LOGIN_SUCCESS, {
+    token,
+    user,
+    permissions,
+  });
 });

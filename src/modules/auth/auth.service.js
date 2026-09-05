@@ -13,7 +13,7 @@ const LOCKOUT_THRESHOLD = 5;
 const LOCKOUT_MINUTES = 15;
 
 const fields =
-  "UserId AS userId, UserName AS userName, Role AS role, Created_at AS createdAt, Created_by AS createdBy, Is_active AS isActive";
+  "UserId AS userId, UserName AS userName, Role AS role, Created_at AS createdAt, Created_by AS createdBy, Is_active AS isActive, Permissions AS permissions";
 
 const findUser = async (userName, includePassword = false) => {
   const extra = includePassword
@@ -113,6 +113,28 @@ export const login = async ({ userName, passwordHash }) => {
        WHERE UserId = @userId`,
     );
 
+  //  Step 6: Resolve permission codes from the user's Permissions JSON array
+  let permissionCodes = [];
+  if (user.permissions) {
+    try {
+      const permissionIds = JSON.parse(user.permissions);
+      if (Array.isArray(permissionIds) && permissionIds.length > 0) {
+        const request = getDB().request();
+        permissionIds.forEach((id, i) => {
+          request.input(`pid${i}`, sql.Int, id);
+        });
+        const placeholders = permissionIds.map((_, i) => `@pid${i}`).join(",");
+        const result = await request.query(
+          `SELECT Code FROM dbo.Permissions WHERE Id IN (${placeholders}) AND IsActive = 1`,
+        );
+        permissionCodes = result.recordset.map((r) => r.Code);
+      }
+    } catch {
+      // If Permissions column is malformed JSON, return empty array
+      permissionCodes = [];
+    }
+  }
+
   const token = generateToken({
     userId: user.userId,
     userName: user.userName,
@@ -122,5 +144,6 @@ export const login = async ({ userName, passwordHash }) => {
   return {
     token,
     user: formatUserResponse(user),
+    permissions: permissionCodes,
   };
 };
