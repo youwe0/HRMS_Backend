@@ -31,6 +31,8 @@
 | `GET /api/attendance/:userId?fromDate=2026-09-01&toDate=2026-09-30` | — | `{ "success": true, "message": "Attendance retrieved successfully", "data": { "attendance": [...] } }` |
 | `POST /api/permissions` | `{ "permissions": [{ "code": "employees.view", "name": "View Employees", "type": "button", "module": "employees" }] }` | `{ "success": true, "message": "Permissions synced successfully", "data": { "created": 1, "updated": 0 } }` |
 | `GET /api/permissions?page=1&limit=50` | — | `{ "success": true, "message": "Permissions retrieved successfully", "data": { "permissions": [...], "pagination": { ... } } }` |
+| `PUT /api/users/:userId/permissions` | `{ "permissions": [1, 2, 3] }` | `{ "success": true, "message": "Permissions assigned successfully", "data": { "user": { "userId": 1, "userName": "john.doe", "permissions": [1, 2, 3] } } }` |
+| `GET /api/users/:userId/permissions` | — | `{ "success": true, "message": "User permissions retrieved successfully", "data": { "user": { "userId": 1, "userName": "john.doe", "permissions": [1, 2, 3] } } }` |
 
 
 
@@ -1450,6 +1452,155 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ---
 
+### PUT /users/:userId/permissions
+
+Assign permissions to a user. Replaces the user's existing permissions with the new list.
+
+- **URL:** `/api/users/:userId/permissions`
+- **Method:** `PUT`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** Yes (auth rate limiter)
+
+#### Path Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `userId` | integer | Yes | Positive integer | The ID of the target user |
+
+#### Request Body
+
+| Field | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `permissions` | array | Yes | Min 0 items, each must be positive integer | Array of permission IDs to assign |
+
+#### Example Request
+
+```http
+PUT /api/users/2/permissions HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "permissions": [1, 2, 3, 5]
+}
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Permissions assigned successfully`
+
+```json
+{
+  "success": true,
+  "message": "Permissions assigned successfully",
+  "data": {
+    "user": {
+      "userId": 2,
+      "userName": "john.doe",
+      "permissions": [1, 2, 3, 5]
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid userId format | `Unexpected request` |
+| `400` | Permission ID does not exist | `One or more permission IDs do not exist` |
+| `400` | Permission ID exists but is inactive | `One or more permission IDs are inactive` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `404` | User not found | `Not found` |
+| `405` | Wrong HTTP method (e.g. GET, POST) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+#### Example Error — Permission ID not found
+
+```json
+{
+  "success": false,
+  "message": "One or more permission IDs do not exist",
+  "errors": [
+    {
+      "field": "permissions",
+      "message": "Permission ID(s) not found: 99"
+    }
+  ]
+}
+```
+
+#### Example Error — Permission ID inactive
+
+```json
+{
+  "success": false,
+  "message": "One or more permission IDs are inactive",
+  "errors": [
+    {
+      "field": "permissions",
+      "message": "Permission ID(s) are inactive: 3"
+    }
+  ]
+}
+```
+
+---
+
+### GET /users/:userId/permissions
+
+Retrieve permissions assigned to a user.
+
+- **URL:** `/api/users/:userId/permissions`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Path Parameters
+
+| Parameter | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `userId` | integer | Yes | Positive integer | The ID of the target user |
+
+#### Example Request
+
+```http
+GET /api/users/2/permissions HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `User permissions retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "User permissions retrieved successfully",
+  "data": {
+    "user": {
+      "userId": 2,
+      "userName": "john.doe",
+      "permissions": [1, 2, 3, 5]
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid userId format | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `404` | User not found | `Not found` |
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
 ## Error Codes Reference
 
 | HTTP Status | Constant | When Used |
@@ -1504,6 +1655,8 @@ All messages are centralized in `src/shared/constants/messages.js`. **Never hard
 | `RESOURCE_BUNDLE_RETRIEVED` | `Resource bundle retrieved successfully` | Successful resource bundle retrieval |
 | `PERMISSIONS_SYNCED` | `Permissions synced successfully` | Successful permissions bulk sync |
 | `PERMISSIONS_RETRIEVED` | `Permissions retrieved successfully` | Successful permissions retrieval |
+| `PERMISSIONS_ASSIGNED` | `Permissions assigned successfully` | Successful permissions assignment to user |
+| `PERMISSIONS_RETRIEVED_FOR_USER` | `User permissions retrieved successfully` | Successful retrieval of user permissions |
 | `INTERNAL_SERVER_ERROR` | `Internal server error` | Unhandled errors (500) |
 
 ---

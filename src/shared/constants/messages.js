@@ -47,6 +47,10 @@ export const MESSAGES = {
   PERMISSION_CREATED: "Permission created successfully",
   PERMISSION_UPDATED: "Permission updated successfully",
   PERMISSION_DELETED: "Permission deleted successfully",
+  PERMISSIONS_ASSIGNED: "Permissions assigned successfully",
+  PERMISSIONS_RETRIEVED_FOR_USER: "User permissions retrieved successfully",
+  PERMISSION_ID_NOT_FOUND: "One or more permission IDs do not exist",
+  PERMISSION_ID_INACTIVE: "One or more permission IDs are inactive",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",
