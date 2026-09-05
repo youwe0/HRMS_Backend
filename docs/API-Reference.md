@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api`
 > **Content-Type:** `application/json`
-> **Last Updated:** 2026-09-04 (Modular Monolith Refactoring — API contracts unchanged)
+> **Last Updated:** 2026-09-05 (Permissions module — RBAC)
 
 ---
 
@@ -29,6 +29,8 @@
 | `GET /api/company-master-config` | — | `{ "success": true, "message": "Company master config retrieved successfully", "data": { "configs": [...] } }` |
 | `POST /api/attendance/:userId` | `{ "clockTime": "2026-09-02T09:00:00.000Z" }` | `{ "success": true, "message": "Clock-in recorded successfully", "data": { "attendance": { "employeeCode": "EC001", "attendanceDate": "...", "clockIn": "...", "clockOut": null } } }` |
 | `GET /api/attendance/:userId?fromDate=2026-09-01&toDate=2026-09-30` | — | `{ "success": true, "message": "Attendance retrieved successfully", "data": { "attendance": [...] } }` |
+| `POST /api/permissions` | `{ "permissions": [{ "code": "employees.view", "name": "View Employees", "type": "button", "module": "employees" }] }` | `{ "success": true, "message": "Permissions synced successfully", "data": { "created": 1, "updated": 0 } }` |
+| `GET /api/permissions?page=1&limit=50` | — | `{ "success": true, "message": "Permissions retrieved successfully", "data": { "permissions": [...], "pagination": { ... } } }` |
 
 
 
@@ -60,6 +62,8 @@
    - [GET /company-master-config](#get-company-master-config)
    - [POST /attendance/:userId](#post-attendanceuserid)
    - [GET /attendance/:userId](#get-attendanceuserid)
+   - [POST /permissions](#post-permissions)
+   - [GET /permissions](#get-permissions)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -1297,6 +1301,155 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ---
 
+### POST /permissions
+
+Bulk-sync permissions. Inserts new permissions and updates existing ones (matched by Code).
+
+- **URL:** `/api/permissions`
+- **Method:** `POST`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** Yes (auth rate limiter)
+
+#### Request Body
+
+| Field | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `permissions` | array | Yes | Min 1 item | Array of permission objects |
+| `permissions[].code` | string | Yes | Trimmed, 1–150 chars, unique | Permission code (e.g. `employees.view`) |
+| `permissions[].name` | string | Yes | Trimmed, 1–200 chars | Human label (e.g. "View Employees") |
+| `permissions[].type` | string | Yes | One of: `module`, `page`, `section`, `button` | Permission type |
+| `permissions[].module` | string | Yes | Trimmed, 1–50 chars | Top-level module grouping |
+| `permissions[].parentCode` | string | No | Trimmed, max 150 chars, nullable | Parent permission code (self-reference) |
+| `permissions[].isActive` | boolean | No | Default: `true` | Whether the permission is active |
+
+#### Example Request
+
+```http
+POST /api/permissions HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "permissions": [
+    {
+      "code": "employees.module",
+      "name": "Employees Module",
+      "type": "module",
+      "module": "employees",
+      "parentCode": null
+    },
+    {
+      "code": "employees.page",
+      "name": "Employees Page",
+      "type": "page",
+      "module": "employees",
+      "parentCode": "employees.module"
+    },
+    {
+      "code": "employees.button.view",
+      "name": "View Employees",
+      "type": "button",
+      "module": "employees",
+      "parentCode": "employees.page"
+    }
+  ]
+}
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Permissions synced successfully`
+
+```json
+{
+  "success": true,
+  "message": "Permissions synced successfully",
+  "data": {
+    "created": 2,
+    "updated": 1
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Validation failed (missing permissions, invalid type) | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. GET, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### GET /permissions
+
+Retrieve a paginated list of all permissions.
+
+- **URL:** `/api/permissions`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Query Parameters
+
+| Parameter | Type | Required | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `page` | integer | No | `1` | Min: `1` | Page number to retrieve |
+| `limit` | integer | No | `10` | Min: `1`, Max: `50` | Number of records per page |
+
+#### Example Request
+
+```http
+GET /api/permissions?page=1&limit=50 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Permissions retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Permissions retrieved successfully",
+  "data": {
+    "permissions": [
+      {
+        "id": 1,
+        "code": "employees.module",
+        "name": "Employees Module",
+        "type": "module",
+        "module": "employees",
+        "parentCode": null,
+        "isActive": 1,
+        "createdAt": "2026-09-05T10:00:00.000Z",
+        "createdBy": 1
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 50,
+      "total": 75,
+      "totalPages": 2
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid query parameters | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
 ## Error Codes Reference
 
 | HTTP Status | Constant | When Used |
@@ -1349,6 +1502,8 @@ All messages are centralized in `src/shared/constants/messages.js`. **Never hard
 | `ATTENDANCE_COMPLETED` | `Attendance completed, try tomorrow` | Attendance already completed for today |
 | `ATTENDANCE_RETRIEVED` | `Attendance retrieved successfully` | Successful attendance retrieval |
 | `RESOURCE_BUNDLE_RETRIEVED` | `Resource bundle retrieved successfully` | Successful resource bundle retrieval |
+| `PERMISSIONS_SYNCED` | `Permissions synced successfully` | Successful permissions bulk sync |
+| `PERMISSIONS_RETRIEVED` | `Permissions retrieved successfully` | Successful permissions retrieval |
 | `INTERNAL_SERVER_ERROR` | `Internal server error` | Unhandled errors (500) |
 
 ---

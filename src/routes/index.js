@@ -10,6 +10,7 @@ import resourceBundleRoutes from "../modules/resourceBundle/resourceBundle.route
 import userDetailRoutes from "../modules/userDetail/userDetail.routes.js";
 import companyMasterConfigRoutes from "../modules/companyMasterConfig/companyMasterConfig.routes.js";
 import attendanceRoutes from "../modules/attendance/attendance.routes.js";
+import permissionRoutes from "../modules/permission/permission.routes.js";
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use("/", resourceBundleRoutes);
 router.use("/userDetail", userDetailRoutes);
 router.use("/company-master-config", companyMasterConfigRoutes);
 router.use("/attendance", attendanceRoutes);
+router.use("/permissions", permissionRoutes);
 
 export default router;

@@ -42,6 +42,11 @@ export const MESSAGES = {
   ATTENDANCE_CLOCKED_OUT: "Clock-out recorded successfully",
   ATTENDANCE_COMPLETED: "Attendance completed, try tomorrow",
   ATTENDANCE_RETRIEVED: "Attendance retrieved successfully",
+  PERMISSIONS_SYNCED: "Permissions synced successfully",
+  PERMISSIONS_RETRIEVED: "Permissions retrieved successfully",
+  PERMISSION_CREATED: "Permission created successfully",
+  PERMISSION_UPDATED: "Permission updated successfully",
+  PERMISSION_DELETED: "Permission deleted successfully",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",
