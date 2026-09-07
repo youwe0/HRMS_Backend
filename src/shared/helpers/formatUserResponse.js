@@ -6,5 +6,6 @@ export const formatUserResponse = (user) => {
   return {
     id: user.userId || user.UserId,
     userName: user.userName || user.UserName,
+    role: user.role || user.Role || null,
   };
 };
