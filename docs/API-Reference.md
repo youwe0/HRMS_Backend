@@ -10,6 +10,8 @@
 
 | API Endpoint | Sample Payload | Success Response |
 |---|---|---|
+| `POST /api/announcements` | `{ "title": "Office closed", "description": "The office will be closed Friday.", "type": "Announcement" }` | `{ "success": true, "message": "Announcement created successfully", "data": { "announcement": { "id": 1, "madeBy": 1, "title": "Office closed", "type": "Announcement" } } }` |
+| `GET /api/announcements?page=1&limit=10` | — | `{ "success": true, "message": "Announcements retrieved successfully", "data": { "announcements": [...], "pagination": { "page": 1, "limit": 10, "total": 1, "totalPages": 1 } } }` |
 | `POST /api/auth/register` | `{ "userName": "john.doe", "password": "securePass123" }` | `{ "success": true, "message": "Registration successful", "data": { "user": { "id": 5, "userName": "john.doe" } } }` |
 | `POST /api/auth/login` | `{ "userName": "john.doe", "passwordHash": "a9993e36..." }` | `{ "success": true, "message": "Login successful", "data": { "token": "eyJhbGci...", "user": { "id": 1, "userName": "john.doe", "role": "admin" }, "permissions": ["employees.view", "departments.view"] } }` |
 | `GET /api/employees?page=1&limit=10` | — | `{ "success": true, "message": "Employees retrieved successfully", "data": { "employees": [...], "pagination": { "page": 1, "limit": 10, "total": 25, "totalPages": 3 } } }` |
@@ -66,6 +68,8 @@
    - [GET /attendance/:userId](#get-attendanceuserid)
    - [POST /permissions](#post-permissions)
    - [GET /permissions](#get-permissions)
+   - [POST /announcements](#post-announcements)
+   - [GET /announcements](#get-announcements)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -1609,6 +1613,103 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 | `401` | Missing or invalid JWT token | `Unauthorized request` |
 | `404` | User not found | `Not found` |
 | `405` | Wrong HTTP method (e.g. POST, PUT) | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### POST /announcements
+
+Create an announcement. The authenticated user's ID is stored as both `madeBy` and the required audit field `createdBy`.
+
+- **URL:** `/api/announcements`
+- **Method:** `POST`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** Yes (auth rate limiter)
+
+#### Request Body
+
+| Field | Type | Required | Constraints | Description |
+|---|---|---|---|---|
+| `title` | string | Yes | Trimmed, 1–200 chars | Announcement heading |
+| `description` | string | Yes | Trimmed, 1–5000 chars | Announcement body |
+| `type` | string | Yes | Trimmed, 1–100 chars | E.g. `Announcement`, `Notification`, or another type |
+
+#### Success Response
+
+- **Status:** `201 Created`
+- **Message:** `Announcement created successfully`
+
+```json
+{
+  "success": true,
+  "message": "Announcement created successfully",
+  "data": {
+    "announcement": {
+      "id": 1,
+      "madeBy": 1,
+      "title": "Office closed",
+      "description": "The office will be closed Friday.",
+      "type": "Announcement",
+      "comments": null,
+      "likes": null,
+      "views": null,
+      "isPinned": null,
+      "createdAt": "2026-09-11T05:30:00.000Z"
+    }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid or missing request fields | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method | `Wrong method` |
+| `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+### GET /announcements
+
+Retrieve announcements in newest-first creation order, 10 records per page by default.
+
+- **URL:** `/api/announcements`
+- **Method:** `GET`
+- **Auth Required:** Yes (JWT Bearer token)
+- **Rate Limited:** No (uses global rate limiter only)
+
+#### Query Parameters
+
+| Parameter | Type | Required | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `page` | integer | No | `1` | Min: 1 | Page number |
+| `limit` | integer | No | `10` | Min: 1, Max: 50 | Records per page |
+
+#### Success Response
+
+- **Status:** `200 OK`
+- **Message:** `Announcements retrieved successfully`
+
+```json
+{
+  "success": true,
+  "message": "Announcements retrieved successfully",
+  "data": {
+    "announcements": [{ "id": 1, "madeBy": 1, "title": "Office closed", "description": "The office will be closed Friday.", "type": "Announcement", "comments": null, "likes": null, "views": null, "isPinned": null, "createdAt": "2026-09-11T05:30:00.000Z" }],
+    "pagination": { "page": 1, "limit": 10, "total": 1, "totalPages": 1 }
+  }
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Message |
+|---|---|---|
+| `400` | Invalid query parameters | `Unexpected request` |
+| `401` | Missing or invalid JWT token | `Unauthorized request` |
+| `405` | Wrong HTTP method | `Wrong method` |
 | `429` | Too many requests | `Too many requests, please try again later` |
 
 ---

@@ -51,6 +51,8 @@ export const MESSAGES = {
   PERMISSIONS_RETRIEVED_FOR_USER: "User permissions retrieved successfully",
   PERMISSION_ID_NOT_FOUND: "One or more permission IDs do not exist",
   PERMISSION_ID_INACTIVE: "One or more permission IDs are inactive",
+  ANNOUNCEMENT_CREATED: "Announcement created successfully",
+  ANNOUNCEMENTS_RETRIEVED: "Announcements retrieved successfully",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",
