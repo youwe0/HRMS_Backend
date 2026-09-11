@@ -20,7 +20,6 @@ router.post(
 
 router.get(
   "/",
-  authRateLimiter,
   authenticate,
   validate(AnnouncementValidators.getAnnouncementsSchema),
   AnnouncementController.getAnnouncements,
