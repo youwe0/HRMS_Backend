@@ -12,6 +12,7 @@ import companyMasterConfigRoutes from "../modules/companyMasterConfig/companyMas
 import attendanceRoutes from "../modules/attendance/attendance.routes.js";
 import permissionRoutes from "../modules/permission/permission.routes.js";
 import announcementRoutes from "../modules/announcement/announcement.routes.js";
+import shiftMasterRoutes from "../modules/shiftMaster/shiftMaster.routes.js";
 
 const router = Router();
 
@@ -27,5 +28,6 @@ router.use("/company-master-config", companyMasterConfigRoutes);
 router.use("/attendance", attendanceRoutes);
 router.use("/permissions", permissionRoutes);
 router.use("/announcements", announcementRoutes);
+router.use("/shift-masters", shiftMasterRoutes);
 
 export default router;

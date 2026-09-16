@@ -35,6 +35,10 @@
 | `GET /api/permissions?page=1&limit=50` | — | `{ "success": true, "message": "Permissions retrieved successfully", "data": { "permissions": [...], "pagination": { ... } } }` |
 | `PUT /api/users/:userId/permissions` | `{ "permissions": [1, 2, 3] }` | `{ "success": true, "message": "Permissions assigned successfully", "data": { "user": { "userId": 1, "userName": "john.doe", "permissions": [1, 2, 3] } } }` |
 | `GET /api/users/:userId/permissions` | — | `{ "success": true, "message": "User permissions retrieved successfully", "data": { "user": { "userId": 1, "userName": "john.doe", "permissions": [1, 2, 3] } } }` |
+| `POST /api/shift-masters` | `{ "shiftCode": "GEN", "shiftName": "General Shift", "startTime": "09:00", "endTime": "18:00" }` | `{ "success": true, "message": "Shift created successfully", "data": { "shift": { "id": 1, "shiftCode": "GEN", "shiftName": "General Shift", ... } } }` |
+| `GET /api/shift-masters?page=1&limit=10` | — | `{ "success": true, "message": "Shifts retrieved successfully", "data": { "shifts": [...], "pagination": { "page": 1, "limit": 10, "total": 5, "totalPages": 1 } } }` |
+| `PUT /api/shift-masters/:id` | `{ "shiftName": "Updated Shift" }` | `{ "success": true, "message": "Shift updated successfully", "data": { "shift": { "id": 1, ... } } }` |
+| `DELETE /api/shift-masters/:id` | — | `{ "success": true, "message": "Shift deleted successfully", "data": { "shift": { "id": 1, "shiftCode": "GEN", "isActive": false } } }` |
 
 
 
@@ -70,6 +74,10 @@
    - [GET /permissions](#get-permissions)
    - [POST /announcements](#post-announcements)
    - [GET /announcements](#get-announcements)
+   - [POST /shift-masters](#post-shift-masters)
+   - [GET /shift-masters](#get-shift-masters)
+   - [PUT /shift-masters/:id](#put-shift-mastersid)
+   - [DELETE /shift-masters/:id](#delete-shift-mastersid)
 5. [Error Codes Reference](#error-codes-reference)
 6. [Common Error Messages](#common-error-messages)
 7. [Middleware Stack](#middleware-stack)
@@ -1711,6 +1719,211 @@ Retrieve announcements in newest-first creation order, 10 records per page by de
 | `401` | Missing or invalid JWT token | `Unauthorized request` |
 | `405` | Wrong HTTP method | `Wrong method` |
 | `429` | Too many requests | `Too many requests, please try again later` |
+
+---
+
+## POST /shift-masters
+
+Create a new shift.
+
+**URL:** `POST /api/shift-masters`
+**Auth:** Required (JWT Bearer token)
+**Rate Limit:** Yes
+
+#### Request Body
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `shiftCode` | string | Yes | Shift code (e.g. "GEN", "NIGHT") |
+| `shiftName` | string | Yes | Shift name (e.g. "General Shift") |
+| `shiftType` | string | No | REGULAR, ROTATIONAL, FLEXIBLE, SPLIT, NIGHT (default: REGULAR) |
+| `startTime` | string | Yes | Start time HH:MM or HH:MM:SS |
+| `endTime` | string | Yes | End time HH:MM or HH:MM:SS |
+| `isOvernight` | boolean | No | true if crosses midnight |
+| `totalShiftHours` | number | No | Total shift hours |
+| `totalBreakTime` | number | No | Break time in minutes |
+| `workingHours` | number | No | Working hours (shift - break) |
+| `graceInMinutes` | integer | No | Late-coming grace period |
+| `graceOutMinutes` | integer | No | Early-going grace period |
+| `halfDayMarkAfterMinutes` | integer | No | Late beyond X mins = half day |
+| `absentMarkAfterMinutes` | integer | No | Late beyond X mins = absent |
+| `minHoursForFullDay` | number | No | Min hours for full day attendance |
+| `checkinWindowBeforeMinutes` | integer | No | How early can employee punch in |
+| `checkoutWindowAfterMinutes` | integer | No | How late can punch out |
+| `weeklyOffDays` | string | No | Weekly off days (e.g. "SAT,SUN") |
+| `status` | string | No | ACTIVE or INACTIVE (default: ACTIVE) |
+
+#### Example Request
+
+```json
+{
+  "shiftCode": "GEN",
+  "shiftName": "General Shift",
+  "shiftType": "REGULAR",
+  "startTime": "09:00:00",
+  "endTime": "18:00:00",
+  "isOvernight": false,
+  "totalShiftHours": 9.00,
+  "totalBreakTime": 30,
+  "workingHours": 8.50,
+  "graceInMinutes": 10,
+  "graceOutMinutes": 10,
+  "halfDayMarkAfterMinutes": 60,
+  "absentMarkAfterMinutes": 120,
+  "minHoursForFullDay": 4.00,
+  "checkinWindowBeforeMinutes": 15,
+  "checkoutWindowAfterMinutes": 15,
+  "weeklyOffDays": "SAT,SUN",
+  "status": "ACTIVE"
+}
+```
+
+#### Success Response
+
+```json
+{
+  "success": true,
+  "message": "Shift created successfully",
+  "data": {
+    "shift": {
+      "id": 1,
+      "shiftCode": "GEN",
+      "shiftName": "General Shift",
+      "shiftType": "REGULAR",
+      "startTime": "09:00:00",
+      "endTime": "18:00:00",
+      "isOvernight": false,
+      "totalShiftHours": 9.00,
+      "totalBreakTime": 30,
+      "workingHours": 8.50,
+      "graceInMinutes": 10,
+      "graceOutMinutes": 10,
+      "halfDayMarkAfterMinutes": 60,
+      "absentMarkAfterMinutes": 120,
+      "minHoursForFullDay": 4.00,
+      "checkinWindowBeforeMinutes": 15,
+      "checkoutWindowAfterMinutes": 15,
+      "weeklyOffDays": "SAT,SUN",
+      "status": "ACTIVE",
+      "createdBy": 1,
+      "createdAt": "2026-09-16T05:30:00.000Z",
+      "isActive": true
+    }
+  }
+}
+```
+
+---
+
+## GET /shift-masters
+
+Retrieve a paginated list of shifts.
+
+**URL:** `GET /api/shift-masters?page=1&limit=10`
+**Auth:** Required (JWT Bearer token)
+
+#### Query Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `page` | integer | 1 | Page number |
+| `limit` | integer | 10 | Records per page (max 50) |
+
+#### Success Response
+
+```json
+{
+  "success": true,
+  "message": "Shifts retrieved successfully",
+  "data": {
+    "shifts": [
+      {
+        "id": 1,
+        "shiftCode": "GEN",
+        "shiftName": "General Shift",
+        "shiftType": "REGULAR",
+        "startTime": "09:00:00",
+        "endTime": "18:00:00",
+        "isOvernight": false,
+        "totalShiftHours": 9.00,
+        "totalBreakTime": 30,
+        "workingHours": 8.50,
+        "status": "ACTIVE",
+        "isActive": true
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 5,
+      "totalPages": 1
+    }
+  }
+}
+```
+
+---
+
+## PUT /shift-masters/:id
+
+Update an existing shift.
+
+**URL:** `PUT /api/shift-masters/:id`
+**Auth:** Required (JWT Bearer token)
+**Rate Limit:** Yes
+
+#### Request Body (partial update — send only fields to change)
+
+| Field | Type | Description |
+|---|---|---|
+| `shiftCode` | string | Shift code |
+| `shiftName` | string | Shift name |
+| `shiftType` | string | REGULAR, ROTATIONAL, FLEXIBLE, SPLIT, NIGHT |
+| `startTime` | string | Start time HH:MM or HH:MM:SS |
+| `endTime` | string | End time HH:MM or HH:MM:SS |
+| `isOvernight` | boolean | true if crosses midnight |
+| `totalShiftHours` | number | Total shift hours |
+| `totalBreakTime` | number | Break time in minutes |
+| `workingHours` | number | Working hours |
+| `graceInMinutes` | integer | Late-coming grace period |
+| `graceOutMinutes` | integer | Early-going grace period |
+| `halfDayMarkAfterMinutes` | integer | Half day threshold |
+| `absentMarkAfterMinutes` | integer | Absent threshold |
+| `minHoursForFullDay` | number | Min hours for full day |
+| `checkinWindowBeforeMinutes` | integer | Early punch-in window |
+| `checkoutWindowAfterMinutes` | integer | Late punch-out window |
+| `weeklyOffDays` | string | Weekly off days |
+| `status` | string | ACTIVE or INACTIVE |
+
+#### Success Response
+
+Returns the full updated shift record.
+
+---
+
+## DELETE /shift-masters/:id
+
+Soft-delete a shift (sets IsActive = 0).
+
+**URL:** `DELETE /api/shift-masters/:id`
+**Auth:** Required (JWT Bearer token)
+
+#### Success Response
+
+```json
+{
+  "success": true,
+  "message": "Shift deleted successfully",
+  "data": {
+    "shift": {
+      "id": 1,
+      "shiftCode": "GEN",
+      "shiftName": "General Shift",
+      "isActive": false
+    }
+  }
+}
+```
 
 ---
 

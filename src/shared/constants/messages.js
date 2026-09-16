@@ -53,6 +53,10 @@ export const MESSAGES = {
   PERMISSION_ID_INACTIVE: "One or more permission IDs are inactive",
   ANNOUNCEMENT_CREATED: "Announcement created successfully",
   ANNOUNCEMENTS_RETRIEVED: "Announcements retrieved successfully",
+  SHIFT_CREATED: "Shift created successfully",
+  SHIFTS_RETRIEVED: "Shifts retrieved successfully",
+  SHIFT_UPDATED: "Shift updated successfully",
+  SHIFT_DELETED: "Shift deleted successfully",
 
   // Server errors
   INTERNAL_SERVER_ERROR: "Internal server error",
